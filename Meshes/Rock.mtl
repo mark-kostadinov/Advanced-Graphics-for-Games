@@ -1,0 +1,8 @@
+newmtl Rock
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ns 16
+map_Kd Rock_d.jpg
+map_bump Rock_s.jpg
+
