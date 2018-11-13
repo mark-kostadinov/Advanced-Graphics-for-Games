@@ -1,5 +1,28 @@
-﻿  CubeRobot.cpp
+﻿  Camera.cpp
+  CubeRobot.cpp
+  Frustum.cpp
+  GameTimer.cpp
+  HeightMap.cpp
+  Keyboard.cpp
+  Matrix4.cpp
+  MD5Anim.cpp
+  MD5FileData.cpp
+  MD5Mesh.cpp
+  MD5Node.cpp
+  Mesh.cpp
+  Mouse.cpp
   OBJMesh.cpp
+  OGLRenderer.cpp
   ParticleEmitter.cpp
+  Plane.cpp
+  Quaternion.cpp
+  SceneNode.cpp
+  Shader.cpp
   Generating Code...
-  nclgl.vcxproj -> C:\Users\b5036861\CSC8502 Advanced Graphics for Games\Coursework\Game Engine\Debug\nclgl.lib
+  Compiling...
+  TextMesh.cpp
+  TextureAtlas.cpp
+c:\users\b5036861\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\textureatlas.cpp(152): warning C4244: 'argument': conversion from 'GLuint' to 'GLfloat', possible loss of data
+  Window.cpp
+  Generating Code...
+  nclgl.vcxproj -> C:\Users\b5036861\CSC8502 Advanced Graphics for Games\Advanced-Graphics-for-Games\Game Engine\Debug\nclgl.lib
