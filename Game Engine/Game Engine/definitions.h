@@ -16,7 +16,7 @@
 #include "../../FMOD/inc/fmod_errors.h"
 
 // Debugging functions
-#define DEBUG
+//#define DEBUG
 
 // Window global variables
 constexpr const char* programTitle = "CSC8502 Coursework";
@@ -30,8 +30,8 @@ typedef FMOD::Channel Channel;
 typedef FMOD::Sound Sound;
 
 // Some GL_CLEAR colour definitions
-#define GL_CLEAR_BLACK				0.0f, 0.0f, 0.0f, 1.0f
-#define GL_CLEAR_GRAY				0.3f, 0.3f, 0.3f, 1.0f
+#define GL_BLACK					0.0f, 0.0f, 0.0f, 1.0f
+#define GL_GRAY						0.3f, 0.3f, 0.3f, 1.0f
 
 // Time definitions
 constexpr float sceneCycleTimeMS = 30000.0f; // i.e. 30 sec
@@ -89,3 +89,5 @@ static Vector2 GenerateRandomPosition(int maxX, int maxZ)
 
 	return result;
 }
+
+#define SHADOWSIZE 2048

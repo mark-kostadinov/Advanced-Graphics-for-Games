@@ -35,8 +35,10 @@ void ResourceManager::EnableAnisotropicFiltering(GLuint texture, GLfloat anisotr
 
 void ResourceManager::LoadShaders()
 {
+	// FIRST_SCENE
 	GetRenderer()->SetDefaultShader(new Shader(SHADERDIR"TexturedVertex.glsl", SHADERDIR"TexturedFragment.glsl"));
 	GetRenderer()->SetSceneNodeShader(new Shader(SHADERDIR"SceneNodeVertex.glsl", SHADERDIR"SceneNodeFragment.glsl"));
+	GetRenderer()->SetSceneObjectShader(new Shader(SHADERDIR"SceneObjectVertex.glsl", SHADERDIR"SceneObjectFragment.glsl"));
 	GetRenderer()->SetSkyboxShader(new Shader(SHADERDIR"SkyboxVertex.glsl", SHADERDIR"SkyboxFragment.glsl"));
 	GetRenderer()->SetHeightMapShader(new Shader(SHADERDIR"HeightMapVertex.glsl", SHADERDIR"HeightMapFragment.glsl"));/// , SHADERDIR"HeightMapTesselationControl.glsl", SHADERDIR"HeightMapTesselationEvaluation.glsl"));
 	GetRenderer()->SetSnowParticleShader(new Shader(SHADERDIR"ParticleEmitterVertex.glsl", SHADERDIR"ParticleEmitterFragment.glsl", "", "", SHADERDIR"ParticleEmitterGeometry.glsl"));
@@ -44,16 +46,17 @@ void ResourceManager::LoadShaders()
 	GetRenderer()->SetSnowCollisionShader(new Shader(SHADERDIR"SnowCollisionVertex.glsl", SHADERDIR"SnowCollisionFragment.glsl"));
 	GetRenderer()->SetRainCollisionShader(new Shader(SHADERDIR"RainCollisionVertex.glsl", SHADERDIR"RainCollisionFragment.glsl"));
 	GetRenderer()->SetPostProcessingShader(new Shader(SHADERDIR"PostProcessingVertex.glsl", SHADERDIR"PostProcessingFragment.glsl"));
-	GetRenderer()->SetSceneObjectShader(new Shader(SHADERDIR"SceneObjectVertex.glsl", SHADERDIR"SceneObjectFragment.glsl"));
-	GetRenderer()->SetFogShader(new Shader(SHADERDIR"FogVertex.glsl", SHADERDIR"FogFragment.glsl"));
+	//GetRenderer()->SetFogShader(new Shader(SHADERDIR"FogVertex.glsl", SHADERDIR"FogFragment.glsl"));
 	GetRenderer()->SetFontShader(new Shader(SHADERDIR"TexturedVertex.glsl", SHADERDIR"TexturedFragment.glsl"));
+	// SECOND_SCENE
+	GetRenderer()->SetShadowShader(new Shader(SHADERDIR"ShadowVertex.glsl", SHADERDIR"ShadowFragment.glsl"));
 
 	if (!GetRenderer()->GetDefaultShader()->LinkProgram() || !GetRenderer()->GetSceneNodeShader()->LinkProgram() ||
-		!GetRenderer()->GetSkyboxShader()->LinkProgram() || !GetRenderer()->GetHeightMapShader()->LinkProgram() || 
-		!GetRenderer()->GetSnowParticleShader()->LinkProgram() || !GetRenderer()->GetRainParticleShader()->LinkProgram() || 
-		!GetRenderer()->GetSnowCollisionShader()->LinkProgram() || !GetRenderer()->GetRainCollisionShader()->LinkProgram() || 
-		!GetRenderer()->GetPostProcessingShader()->LinkProgram() || !GetRenderer()->GetSceneObjectShader()->LinkProgram() || 
-		!GetRenderer()->GetFogShader()->LinkProgram() || !GetRenderer()->GetFontShader()->LinkProgram())
+		!GetRenderer()->GetSceneObjectShader()->LinkProgram() || !GetRenderer()->GetSkyboxShader()->LinkProgram() || 
+		!GetRenderer()->GetHeightMapShader()->LinkProgram() || !GetRenderer()->GetSnowParticleShader()->LinkProgram() || 
+		!GetRenderer()->GetRainParticleShader()->LinkProgram() || !GetRenderer()->GetSnowCollisionShader()->LinkProgram() || 
+		!GetRenderer()->GetRainCollisionShader()->LinkProgram() || !GetRenderer()->GetPostProcessingShader()->LinkProgram() || 
+		!GetRenderer()->GetFontShader()->LinkProgram() || !GetRenderer()->GetShadowShader()->LinkProgram()) // !GetRenderer()->GetFogShader()->LinkProgram()
 	{
 		PrintToConsole("Could not link one of the shaders!", 1);
 		return;
@@ -160,6 +163,13 @@ void ResourceManager::SetMeshes()
 		PrintToConsole("Could not load the cube texture!", 1);
 		return;
 	}
+	GetRenderer()->SetFloorMesh(Mesh::GenerateQuad());
+	GetRenderer()->GetFloorMesh()->SetTexture(GetRenderer()->GetHeightMapTexture());
+	if (!GetRenderer()->GetFloorMesh()->GetTexture())
+	{
+		PrintToConsole("Could not load the floor texture!", 1);
+		return;
+	}
 
 	// Set the heightMap
 	GetRenderer()->SetHeightMap(new HeightMap(TEXTUREDIR"terrain512.raw"));
@@ -249,11 +259,22 @@ void ResourceManager::SetSceneNodes()
 	}
 
 	// SECOND_SCENE
-	GetRenderer()->SetCubeNode(new SceneNode(GetRenderer()->GetCubeMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneNodeShader()));
-	GetRenderer()->GetCubeNode()->SetTransform(Matrix4::Translation(Vector3(2000.0f, 0.0f, 2000.0f)) * defaultRotationMatrix);
-	GetRenderer()->GetCubeNode()->SetModelScale(Vector3(500.0f, 500.0f, 200.0f));
-	GetRenderer()->GetCubeNode()->SetBoundingRadius(100.0f);
+	GetRenderer()->SetCubeNode(new SceneNode(GetRenderer()->GetCubeMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader()));
+	GetRenderer()->GetCubeNode()->SetTransform(Matrix4::Translation(Vector3(3000.0f, 500.0f, 3000.0f)) * defaultRotationMatrix);
+	GetRenderer()->GetCubeNode()->SetModelScale(Vector3(400.0f, 500.0f, 200.0f));
+	GetRenderer()->GetCubeNode()->SetBoundingRadius(5000.0f);
 	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetCubeNode());
+
+	GetRenderer()->SetFloorNode(new SceneNode(GetRenderer()->GetFloorMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader()));
+	GetRenderer()->GetFloorNode()->SetTransform(Matrix4::Translation(Vector3(3000.0f, 0.0f, 3000.0f)) * Matrix4::Rotation(90.0f, Vector3(1.0f, 0.0f, 0.0f)));
+	GetRenderer()->GetFloorNode()->SetModelScale(Vector3(5000.0f, 5000.0f, 5000.0f));
+	GetRenderer()->GetFloorNode()->SetBoundingRadius(10000.0f);
+	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetFloorNode());
+
+	for (int i = 0; i < 1; i++)
+	{
+		GenerateObjects(GetRenderer()->GetTreeMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader(), 200.0f, defaultRotationMatrix, treeModelScale, 10000.0f, GetRenderer()->GetTreeNodesVector(), GetRenderer()->GetRootNode(SECOND_SCENE));
+	}
 
 	// FINAL_SCENE
 }

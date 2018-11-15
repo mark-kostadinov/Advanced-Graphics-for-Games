@@ -14,7 +14,7 @@ Renderer::Renderer(Window &parent, SceneManager * sceneManager) : OGLRenderer(pa
 
 	// Initialize the main light
 	SetMainLight(new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X) / 2.0f, 10000.0f, (RAW_WIDTH * HEIGHTMAP_Z) / 2.0f),
-		Vector4(1, 1, 1, 1), RAW_HEIGHT * HEIGHTMAP_X));
+		Vector4(1, 1, 1, 1), RAW_HEIGHT * HEIGHTMAP_X * 1.5f));
 
 	// Generate multiple moving lights for the rain scene
 	GenerateMultipleLights(movingLightsCount);
@@ -50,25 +50,25 @@ void Renderer::UpdateScene(float msec)
 
 void Renderer::RenderScene()
 {
-	glClearColor(GL_CLEAR_BLACK);
+	glClearColor(GL_BLACK);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// If it is time to change the scene, apply some post-processing effects on it
 #ifndef DEBUG
 	if (GetSceneManager()->IsSceneCyclingAllowed() && 
-		GetSceneManager()->GetSceneTimer()->GetMS() >= sceneCycleTimeMS - sceneTransitionTime && 
-		GetSceneManager()->GetSceneTimer()->GetMS() <= sceneCycleTimeMS + 50.0f) // Allows some extra milliseconds for the timer to reset
+		GetSceneManager()->GetSceneTimer()->GetMS() >= sceneCycleTimeMS - sceneTransitionTime)
 #endif // DEBUG
 #ifdef DEBUG
 	if (Window::GetKeyboard()->KeyHeld(KEYBOARD_4))
 #endif // DEBUG
 	{
+		DrawShadowScene();
 		glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		fboInUse = true;
 		DrawScene();
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		fboInUse = false;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// Have to split it up due to the use of another FBO in some methods
 		if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE)
@@ -82,6 +82,7 @@ void Renderer::RenderScene()
 	}
 	else
 	{
+		DrawShadowScene();
 		DrawScene();
 		blurFactor = 1.0f;
 	}
@@ -97,6 +98,35 @@ void Renderer::DrawScene()
 	SwitchScenesRendering();
 	SortNodeLists();
 	DrawNodes();
+}
+
+void Renderer::DrawShadowScene()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, SHADOWSIZE, SHADOWSIZE);
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glCullFace(GL_FRONT); // Solves shadow acne
+	castShadows = true;
+
+	//Matrix4 tempMatrix = projMatrix;
+	//projMatrix = Matrix4::Perspective(6000, 18000, 1, fov);
+
+	viewMatrix = Matrix4::BuildViewMatrix(mainLight->GetPosition(), Vector3(0, 0, 0));
+	shadowMatrix = biasMatrix * (projMatrix * viewMatrix);
+	fboInUse = true;
+	DrawScene();
+	fboInUse = false;
+	ClearNodeLists();
+
+	//projMatrix = tempMatrix;
+
+	castShadows = false;
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	glViewport(0, 0, width, height);
+	glCullFace(GL_BACK);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	viewMatrix = camera->BuildViewMatrix();
 }
 
 void Renderer::ApplyPostProcessEffects()
@@ -118,6 +148,17 @@ void Renderer::GenerateFBOs()
 	GenerateDepthTextureFBO(postProcessingDepthTexture);
 	GenerateDepthTextureFBO(bufferDepthTexture);
 
+	/// TODO: Function
+	glGenTextures(1, &shadowTexture);
+	glBindTexture(GL_TEXTURE_2D, shadowTexture);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOWSIZE, SHADOWSIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	///
+
 	GenerateColourTextureFBO(snowBufferColourTexture);
 	GenerateColourTextureFBO(rainBufferColourTexture);
 	GenerateColourTextureFBO(postProcessingColourTexture);
@@ -128,6 +169,14 @@ void Renderer::GenerateFBOs()
 	glGenFramebuffers(1, &rainCollisionFBO);
 	glGenFramebuffers(1, &postProcessingFBO);
 	glGenFramebuffers(1, &bufferFBO);
+
+	/// TODO: Function
+	glGenFramebuffers(1, &shadowFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTexture, 0);
+	glDrawBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	///
 
 	AttachTexturesFBO(snowCollisionFBO, snowBufferColourTexture, snowBufferDepthTexture);
 	AttachTexturesFBO(rainCollisionFBO, rainBufferColourTexture, rainBufferDepthTexture);
@@ -160,7 +209,7 @@ void Renderer::GenerateColourTextureFBO(GLuint &texture)
 void Renderer::AttachTexturesFBO(GLuint & fbo, GLuint & colourTexture, GLuint & depthTexture)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	glClearColor(GL_CLEAR_BLACK);
+	glClearColor(GL_BLACK);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
@@ -218,26 +267,33 @@ void Renderer::DrawParticleCollisionFBO()
 }
 
 /// TODO: Come back to this later
-void Renderer::DrawFog()
-{
-	//glClearColor(0.5, 0.5, 0.5, 1);
-	//glClearDepth(1);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, postProcessingFBO);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTexture[1], 0);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-	SetCurrentShader(fogShader);
-	UpdateShaderMatrices();
-	glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "diffuseTex"), 0);
-	glUniform3fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), "cameraPos"), 1, (float*)&camera->GetPosition());
-	glUniform3fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), "lightPos"), 1, (float*)&mainLight->GetPosition());
-
-	versatileMesh->Draw();
-
-	glUseProgram(0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
+//void Renderer::DrawFog()
+//{
+//	//glClearColor(0.5, 0.5, 0.5, 1);
+//	//glClearDepth(1);
+//
+//	glBindFramebuffer(GL_FRAMEBUFFER, postProcessingFBO);
+//	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTexture[1], 0);
+//	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+//
+//	SetCurrentShader(fogShader);
+//	UpdateShaderMatrices();
+//	glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "diffuseTex"), 0);
+//	glUniform3fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), "cameraPos"), 1, (float*)&camera->GetPosition());
+//	glUniform3fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), "lightPos"), 1, (float*)&mainLight->GetPosition());
+//
+//	versatileMesh->Draw();
+//
+//	glUseProgram(0);
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//	//	read fragment depth from depth texture
+//	//	perform scene depth reconstruction
+//	//	compute eye-to-fragment vector
+//	//	compute fragment position in real world
+//	//	compute Euclidean distance between the camera and the fragment
+//	//	evaluate fog integral
+//	//	compute alpha value
+//}
 
 void Renderer::DrawPostProcess()
 {
@@ -283,15 +339,6 @@ void Renderer::DrawPostProcess()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-
-	/// FOG
-	//	read fragment depth from depth texture
-	//	perform scene depth reconstruction
-	//	compute eye-to-fragment vector
-	//	compute fragment position in real world
-	//	compute Euclidean distance between the camera and the fragment
-	//	evaluate fog integral
-	//	compute alpha value
 }
 
 void Renderer::RenderWeather()
@@ -472,6 +519,8 @@ void Renderer::DeleteObjects()
 	// SECOND_SCENE
 	delete cubeMesh;
 	cubeMesh = NULL;
+	delete floorMesh;
+	floorMesh = NULL;
 
 	for (int i = 0; i < scenesCount; i++)
 	{
@@ -517,10 +566,13 @@ void Renderer::DeleteObjects()
 
 void Renderer::DeleteShaders()
 {
+	// FIRST_SCENE
 	delete defaultShader;
 	defaultShader = NULL;
 	delete sceneNodeShader;
 	sceneNodeShader = NULL;
+	delete sceneObjectShader;
+	sceneObjectShader = NULL;
 	delete skyboxShader;
 	skyboxShader = NULL;
 	delete heightMapShader;
@@ -535,12 +587,13 @@ void Renderer::DeleteShaders()
 	rainCollisionShader = NULL;
 	delete postProcessingShader;
 	postProcessingShader = NULL;
-	delete sceneObjectShader;
-	sceneObjectShader = NULL;
-	delete fogShader;
-	fogShader = NULL;
+	//delete fogShader;
+	//fogShader = NULL;
 	delete fontShader;
 	fontShader = NULL;
+	// SECOND_SCENE
+	delete shadowShader;
+	shadowShader = NULL;
 
 	currentShader = 0;
 }
@@ -566,6 +619,8 @@ void Renderer::DeleteTextures()
 	glDeleteFramebuffers(1, &bufferFBO);
 	// SECOND_SCENE
 	glDeleteTextures(1, &cubeTexture);
+	glDeleteTextures(1, &shadowTexture);
+	glDeleteFramebuffers(1, &shadowFBO);
 }
 
 void Renderer::GenerateMultipleLights(int count)
@@ -693,7 +748,11 @@ void Renderer::DrawNode(SceneNode*n)
 		if (n->GetMesh() == rainEmitter && !renderRain)
 			return;
 
-		SetCurrentShader(n->GetShader());
+		if (castShadows)
+			SetCurrentShader(shadowShader);
+		else
+			SetCurrentShader(n->GetShader());
+
 		SetLighting(n);
 		SetHeightMapBufferTexture(n);
 		SetUniforms(n);
@@ -711,6 +770,10 @@ void Renderer::SetUniforms(SceneNode* n)
 
 	glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "bumpTex"), 1);
+	if (n->GetMesh()->GetBumpMap())
+		glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "hasBumpTexture"), 1);
+	else
+		glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "hasBumpTexture"), 0);
 	glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "useTexture"), (int)n->GetMesh()->GetTexture());
 	glUniform3fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), "cameraPos"), 1, (float*)&camera->GetPosition());
 	glUniform4fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), "nodeColour"), 1, (float*)&n->GetColour());
@@ -727,14 +790,29 @@ void Renderer::SetUniforms(SceneNode* n)
 	glUniform1f(glGetUniformLocation(GetCurrentShader()->GetProgram(), "terrainSize"), RAW_SIZE);
 	glUniform1f(glGetUniformLocation(GetCurrentShader()->GetProgram(), "terrainGridSize"), HEIGHTMAP_X);
 
+	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == cubeMesh ||
+		n->GetMesh() == floorMesh)
+	{
+		glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), 4);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, shadowTexture);
+	}
+
+	modelMatrix = n->GetWorldTransform() * Matrix4::Scale(n->GetModelScale());
 	UpdateShaderMatrices();
 
-	glUniformMatrix4fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), "modelMatrix"), 1, false, (float*)&(n->GetWorldTransform()*Matrix4::Scale(n->GetModelScale())));
+	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == cubeMesh ||
+		n->GetMesh() == floorMesh)
+	{
+		Matrix4 tempMatrix = shadowMatrix * modelMatrix;
+		glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "shadowMatrix"), 1, false, tempMatrix.values);
+	}
 }
 
 void Renderer::SetLighting(SceneNode * n)
 {
-	if (n->GetMesh() == heightMap || treeMesh || rockMesh)
+	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == cubeMesh || 
+		n->GetMesh() == floorMesh)
 	{
 		/// TODO: Change the shader to be able reflect multiple lights (i.e. add multiple light positions as uniforms, etc.)
 		if (renderRain)

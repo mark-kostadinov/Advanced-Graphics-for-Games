@@ -53,8 +53,11 @@ public:
 	void		SetRainEmitterNode(SceneNode* n)		{ rainEmitterNode = n; }
 	vector<SceneNode*> GetTreeNodesVector() const		{ return treeNodes; }
 	vector<SceneNode*> GetRockNodesVector() const		{ return rockNodes; }
+	// SECOND_SCENE
 	SceneNode*	GetCubeNode() const						{ return cubeNode; }
 	void		SetCubeNode(SceneNode* n)				{ cubeNode = n; }
+	SceneNode*	GetFloorNode() const					{ return floorNode; }
+	void		SetFloorNode(SceneNode* n)				{ floorNode = n; }
 
 	HeightMap*	GetHeightMap() const					{ return heightMap; }
 	void		SetHeightMap(HeightMap* h)				{ heightMap = h; }
@@ -74,9 +77,13 @@ public:
 	void		SetTreeMesh(OBJMesh* m)					{ treeMesh = m; }
 	OBJMesh*	GetRockMesh() const						{ return rockMesh; }
 	void		SetRockMesh(OBJMesh* m)					{ rockMesh = m; }
+	// SECOND_SCENE
 	Mesh*		GetCubeMesh() const						{ return cubeMesh; }
 	void		SetCubeMesh(Mesh* m)					{ cubeMesh = m; }
+	Mesh*		GetFloorMesh() const					{ return floorMesh; }
+	void		SetFloorMesh(Mesh* m)					{ floorMesh = m; }
 	
+	// FIRST_SCENE
 	GLuint		GetCubeMapSunnyTexture() const			{ return cubeMapSunnyTexture; }
 	void		SetCubeMapSunnyTexture(GLuint t)		{ cubeMapSunnyTexture = t; }
 	GLuint		GetCubeMapCloudyTexture() const			{ return cubeMapCloudyTexture; }
@@ -85,13 +92,19 @@ public:
 	void		SetHeightMapTexture(GLuint t)			{ heightMapTexture = t; }
 	GLuint		GetHeightMapBumpTexture() const			{ return heightMapBumpTexture; }
 	void		SetHeightMapBumpTexture(GLuint t)		{ heightMapBumpTexture = t; }
+	// SECOND_SCENE
 	GLuint		GetCubeTexture() const					{ return cubeTexture; }
 	void		SetCubeTexture(GLuint t)				{ cubeTexture = t; }
+	GLuint		GetShadowTexture() const				{ return shadowTexture; }
+	void		SetShadowTexture(GLuint t)				{ shadowTexture = t; }
 
+	// FIRST_SCENE
 	Shader*		GetDefaultShader() const				{ return defaultShader; }
 	void		SetDefaultShader(Shader* s)				{ defaultShader = s; }
 	Shader*		GetSceneNodeShader() const				{ return sceneNodeShader; }
 	void		SetSceneNodeShader(Shader* s)			{ sceneNodeShader = s; }
+	Shader*		GetSceneObjectShader() const			{ return sceneObjectShader; }
+	void		SetSceneObjectShader(Shader* s)			{ sceneObjectShader = s; }
 	Shader*		GetSkyboxShader() const					{ return skyboxShader; }
 	void		SetSkyboxShader(Shader* s)				{ skyboxShader = s; }
 	Shader*		GetHeightMapShader() const				{ return heightMapShader; }
@@ -106,12 +119,13 @@ public:
 	void		SetRainCollisionShader(Shader* s)		{ rainCollisionShader = s; }
 	Shader*		GetPostProcessingShader() const			{ return postProcessingShader; }
 	void		SetPostProcessingShader(Shader* s)		{ postProcessingShader = s; }
-	Shader*		GetSceneObjectShader() const			{ return sceneObjectShader; }
-	void		SetSceneObjectShader(Shader* s)			{ sceneObjectShader = s; }
-	Shader*		GetFogShader() const					{ return fogShader; }
-	void		SetFogShader(Shader* s)					{ fogShader = s; }
+	//Shader*		GetFogShader() const					{ return fogShader; }
+	//void		SetFogShader(Shader* s)					{ fogShader = s; }
 	Shader*		GetFontShader() const					{ return fontShader; }
 	void		SetFontShader(Shader* s)				{ fontShader = s; }
+	// SECOND_SCENE
+	Shader*		GetShadowShader() const					{ return shadowShader; }
+	void		SetShadowShader(Shader* s)				{ shadowShader = s; }
 
 	// Snow and rain rendering booleans
 	void		SetRenderSnow(bool b)	{ renderSnow = b; }
@@ -134,6 +148,7 @@ protected:
 	void	SwitchScenesRendering();
 	void	SwitchScenesUpdating();
 	void	DrawScene();
+	void	DrawShadowScene();
 	void	ApplyPostProcessEffects();
 
 	void	SetShaderParticleSize(float f);
@@ -186,6 +201,7 @@ protected:
 	vector<SceneNode*>	rockNodes;
 	// SECOND_SCENE
 	SceneNode*			cubeNode;
+	SceneNode*			floorNode;
 
 	// FIRST_SCENE
 	Font*			dataFont;
@@ -200,6 +216,7 @@ protected:
 	OBJMesh*		rockMesh;
 	// SECOND_SCENE
 	Mesh*			cubeMesh;
+	Mesh*			floorMesh;
 
 	// FIRST_SCENE
 	GLuint		cubeMapSunnyTexture;
@@ -209,6 +226,7 @@ protected:
 	// SECOND_SCENE
 	GLuint		cubeTexture;
 
+	// FIRST_SCENE
 	GLuint		snowCollisionFBO;
 	GLuint		snowBufferColourTexture;
 	GLuint		snowBufferDepthTexture;
@@ -221,9 +239,14 @@ protected:
 	GLuint		postProcessingFBO;
 	GLuint		postProcessingColourTexture;
 	GLuint		postProcessingDepthTexture;
+	// SECOND_SCENE
+	GLuint		shadowFBO;
+	GLuint		shadowTexture;
 
-	Shader*		sceneNodeShader;
+	// FIRST_SCENE
 	Shader*		defaultShader;
+	Shader*		sceneNodeShader;
+	Shader*		sceneObjectShader;
 	Shader*		skyboxShader;
 	Shader*		heightMapShader;
 	Shader*		snowParticleShader;
@@ -231,9 +254,10 @@ protected:
 	Shader*		snowCollisionShader;
 	Shader*		rainCollisionShader;
 	Shader*		postProcessingShader;
-	Shader*		sceneObjectShader;
-	Shader*		fogShader;
+	//Shader*		fogShader;
 	Shader*		fontShader;
+	// SECOND_SCENE
+	Shader*		shadowShader;
 
 	bool renderSnow = false;
 	bool renderRain = false;
@@ -244,6 +268,7 @@ protected:
 	float alphaFade = 1.0f;
 	float blurFactor = 1.0f;
 	bool fboInUse = false;
+	bool castShadows = false;
 
 	Frustum		frameFrustum;
 

@@ -1,23 +1,4 @@
-﻿  main.cpp
-  SceneManager.cpp
+﻿  SceneManager.cpp
+  main.cpp
   Generating Code...
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewActiveTexture imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewGetUniformLocation imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniform1f imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniform1i imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniform2f imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniform3fv imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniform4fv imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniformMatrix4fv imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUseProgram imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewBindFramebuffer imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewCheckFramebufferStatus imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewDeleteFramebuffers imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewFramebufferTexture2D imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewGenFramebuffers imported
-glew32.lib(glew.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'glew32.lib(glew.obj)' or at 'C:\Users\b5036861\CSC8502 Advanced Graphics for Games\Advanced-Graphics-for-Games\Game Engine\Debug\vc120.pdb'; linking object as if no debug info
-SOIL.lib(image_DXT.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(image_DXT.obj)' or at 'C:\Users\b5036861\CSC8502 Advanced Graphics for Games\Advanced-Graphics-for-Games\Game Engine\Debug\SOIL.pdb'; linking object as if no debug info
-SOIL.lib(image_helper.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(image_helper.obj)' or at 'C:\Users\b5036861\CSC8502 Advanced Graphics for Games\Advanced-Graphics-for-Games\Game Engine\Debug\SOIL.pdb'; linking object as if no debug info
-SOIL.lib(SOIL.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(SOIL.obj)' or at 'C:\Users\b5036861\CSC8502 Advanced Graphics for Games\Advanced-Graphics-for-Games\Game Engine\Debug\SOIL.pdb'; linking object as if no debug info
-SOIL.lib(stb_image_aug.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(stb_image_aug.obj)' or at 'C:\Users\b5036861\CSC8502 Advanced Graphics for Games\Advanced-Graphics-for-Games\Game Engine\Debug\SOIL.pdb'; linking object as if no debug info
-  Game Engine.vcxproj -> C:\Users\b5036861\CSC8502 Advanced Graphics for Games\Advanced-Graphics-for-Games\Game Engine\Debug\Game Engine.exe
+  Game Engine.vcxproj -> C:\Users\b5036861\GitHub\Advanced-Graphics-for-Games\Game Engine\Debug\Game Engine.exe

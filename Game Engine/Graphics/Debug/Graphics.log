@@ -1,6 +1,5 @@
-﻿  stdafx.cpp
-  RainEmitter.cpp
+﻿  RainEmitter.cpp
   Renderer.cpp
   SnowEmitter.cpp
   Generating Code...
-  Graphics.vcxproj -> C:\Users\b5036861\CSC8502 Advanced Graphics for Games\Advanced-Graphics-for-Games\Game Engine\Debug\Graphics.lib
+  Graphics.vcxproj -> C:\Users\b5036861\GitHub\Advanced-Graphics-for-Games\Game Engine\Debug\Graphics.lib
