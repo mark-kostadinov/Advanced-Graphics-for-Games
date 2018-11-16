@@ -92,12 +92,6 @@ void ResourceManager::LoadTextures()
 		TEXTUREDIR"tahoma.TGA", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT), 16, 16));
 
 	// SECOND_SCENE
-#ifdef DEBUG
-	GetRenderer()->SetCubeTexture(SOIL_load_OGL_texture(TEXTUREDIR"ground.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0));
-#endif // DEBUG
-#ifndef DEBUG
-	GetRenderer()->SetCubeTexture(SOIL_load_OGL_texture(TEXTUREDIR"ground.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-#endif // DEBUG
 
 	CheckTextureLoading();
 }
@@ -140,12 +134,6 @@ void ResourceManager::CheckTextureLoading()
 	}
 
 	// SECOND_SCENE
-	if (!GetRenderer()->GetCubeTexture())
-	{
-		PrintToConsole("Could not load the cube texture!", 1);
-		return;
-	}
-	GetRenderer()->SetTextureRepeating(GetRenderer()->GetCubeTexture(), true);
 }
 
 void ResourceManager::SetMeshes()
@@ -155,21 +143,6 @@ void ResourceManager::SetMeshes()
 	GetRenderer()->SetWeatherEffectsMesh(Mesh::GenerateQuad());
 	GetRenderer()->SetOriginCubeMesh(Mesh::LoadMeshFile(MESHDIR"cube.asciimesh"));
 	GetRenderer()->SetSkyMesh(Mesh::GenerateQuad());
-	// SECOND_DCENE
-	GetRenderer()->SetCubeMesh(Mesh::LoadMeshFile(MESHDIR"cube.asciimesh"));
-	GetRenderer()->GetCubeMesh()->SetTexture(GetRenderer()->GetCubeTexture());
-	if (!GetRenderer()->GetCubeMesh()->GetTexture())
-	{
-		PrintToConsole("Could not load the cube texture!", 1);
-		return;
-	}
-	GetRenderer()->SetFloorMesh(Mesh::GenerateQuad());
-	GetRenderer()->GetFloorMesh()->SetTexture(GetRenderer()->GetHeightMapTexture());
-	if (!GetRenderer()->GetFloorMesh()->GetTexture())
-	{
-		PrintToConsole("Could not load the floor texture!", 1);
-		return;
-	}
 
 	// Set the heightMap
 	GetRenderer()->SetHeightMap(new HeightMap(TEXTUREDIR"terrain512.raw"));
@@ -202,6 +175,19 @@ void ResourceManager::SetMeshes()
 	GetRenderer()->SetRockMesh(new OBJMesh());
 	GetRenderer()->GetRockMesh()->LoadOBJMesh(MESHDIR"Rock.obj");
 	EnableAnisotropicFiltering(GetRenderer()->GetRockMesh()->GetTexture(), largestSupportedAnisotropyLevel);
+
+	// SECOND_SCENE
+	GetRenderer()->SetSphereMesh(new OBJMesh());
+	GetRenderer()->GetSphereMesh()->LoadOBJMesh(MESHDIR"sphere.obj");
+	//EnableAnisotropicFiltering(GetRenderer()->GetSphereMesh()->GetTexture(), largestSupportedAnisotropyLevel);
+
+	GetRenderer()->SetFloorMesh(Mesh::GenerateQuad());
+	GetRenderer()->GetFloorMesh()->SetTexture(GetRenderer()->GetHeightMapTexture());
+	if (!GetRenderer()->GetFloorMesh()->GetTexture())
+	{
+		PrintToConsole("Could not load the floor texture!", 1);
+		return;
+	}
 }
 
 void ResourceManager::SetSceneNodes()
@@ -259,22 +245,17 @@ void ResourceManager::SetSceneNodes()
 	}
 
 	// SECOND_SCENE
-	GetRenderer()->SetCubeNode(new SceneNode(GetRenderer()->GetCubeMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader()));
-	GetRenderer()->GetCubeNode()->SetTransform(Matrix4::Translation(Vector3(3000.0f, 500.0f, 3000.0f)) * defaultRotationMatrix);
-	GetRenderer()->GetCubeNode()->SetModelScale(Vector3(400.0f, 500.0f, 200.0f));
-	GetRenderer()->GetCubeNode()->SetBoundingRadius(5000.0f);
-	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetCubeNode());
+	GetRenderer()->SetSphereNode(new SceneNode(GetRenderer()->GetSphereMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader()));
+	GetRenderer()->GetSphereNode()->SetTransform(Matrix4::Translation(Vector3(3000.0f, 1000.0f, 3000.0f)) * defaultRotationMatrix);
+	GetRenderer()->GetSphereNode()->SetModelScale(Vector3(50.0f, 50.0f, 50.0f));
+	GetRenderer()->GetSphereNode()->SetBoundingRadius(5000.0f);
+	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetSphereNode());
 
 	GetRenderer()->SetFloorNode(new SceneNode(GetRenderer()->GetFloorMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader()));
 	GetRenderer()->GetFloorNode()->SetTransform(Matrix4::Translation(Vector3(3000.0f, 0.0f, 3000.0f)) * Matrix4::Rotation(90.0f, Vector3(1.0f, 0.0f, 0.0f)));
 	GetRenderer()->GetFloorNode()->SetModelScale(Vector3(5000.0f, 5000.0f, 5000.0f));
 	GetRenderer()->GetFloorNode()->SetBoundingRadius(10000.0f);
 	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetFloorNode());
-
-	for (int i = 0; i < 1; i++)
-	{
-		GenerateObjects(GetRenderer()->GetTreeMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader(), 200.0f, defaultRotationMatrix, treeModelScale, 10000.0f, GetRenderer()->GetTreeNodesVector(), GetRenderer()->GetRootNode(SECOND_SCENE));
-	}
 
 	// FINAL_SCENE
 }

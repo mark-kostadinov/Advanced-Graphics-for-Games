@@ -46,6 +46,22 @@ void InterfaceManager::Update()
 	}
 	else
 		GetRenderer()->ResetWeatherConditions();
+	// Toggle shadow debugging mode
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_4))
+	{
+		if (!GetRenderer()->IsShadowDebuggingModeOn())
+			GetRenderer()->SetShadowDebuggingMode(true);
+		else
+			GetRenderer()->SetShadowDebuggingMode(false);
+	}
+	// Toggle moving light mode
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_5))
+	{
+		if (!GetRenderer()->IsMovingLightModeOn())
+			GetRenderer()->SetMovingLightMode(true);
+		else
+			GetRenderer()->SetMovingLightMode(false);
+	}
 	// Switch to the previous scene
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT))
 		SwitchToPreviousScene();

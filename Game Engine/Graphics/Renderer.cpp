@@ -13,11 +13,11 @@ Renderer::Renderer(Window &parent, SceneManager * sceneManager) : OGLRenderer(pa
 	camera = new Camera(0.0f, 0.0f, Vector3(8000.0f, 4000.0f, 20000.0f));
 
 	// Initialize the main light
-	SetMainLight(new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X) / 2.0f, 10000.0f, (RAW_WIDTH * HEIGHTMAP_Z) / 2.0f),
-		Vector4(1, 1, 1, 1), RAW_HEIGHT * HEIGHTMAP_X * 1.5f));
+	SetMainLight(new Light(Vector3(-4000.0f, 10000.0f, -4000.0f), Vector4(1, 1, 1, 1), RAW_HEIGHT * HEIGHTMAP_X * 6.0f));
 
-	// Generate multiple moving lights for the rain scene
-	GenerateMultipleLights(movingLightsCount);
+	// Generate a moving light for the rain scene
+	Vector2 randomPosition = GenerateRandomPosition((int)(RAW_HEIGHT * HEIGHTMAP_X), (int)(RAW_WIDTH * HEIGHTMAP_Z));
+	SetMovingLight(new Light(Vector3(randomPosition.x, 25000.0f, randomPosition.y), Vector4(1, 1, 1, 1), RAW_HEIGHT * HEIGHTMAP_X * 5.0f));
 
 	// Create the Frame Buffer Object
 	GenerateFBOs();
@@ -57,9 +57,6 @@ void Renderer::RenderScene()
 #ifndef DEBUG
 	if (GetSceneManager()->IsSceneCyclingAllowed() && 
 		GetSceneManager()->GetSceneTimer()->GetMS() >= sceneCycleTimeMS - sceneTransitionTime)
-#endif // DEBUG
-#ifdef DEBUG
-	if (Window::GetKeyboard()->KeyHeld(KEYBOARD_4))
 #endif // DEBUG
 	{
 		DrawShadowScene();
@@ -109,17 +106,26 @@ void Renderer::DrawShadowScene()
 	glCullFace(GL_FRONT); // Solves shadow acne
 	castShadows = true;
 
-	//Matrix4 tempMatrix = projMatrix;
-	//projMatrix = Matrix4::Perspective(6000, 18000, 1, fov);
+	Light currentLight;
+	if (IsMovingLightModeOn())
+		currentLight = *movingLight;
+	else
+		currentLight = *mainLight;
 
-	viewMatrix = Matrix4::BuildViewMatrix(mainLight->GetPosition(), Vector3(0, 0, 0));
+	Matrix4 tempMatrix = projMatrix;
+	projMatrix = Matrix4::Perspective(1.0f, 30000.0f, 1, 90.0f);
+
+	if (IsMovingLightModeOn())
+		viewMatrix = Matrix4::BuildViewMatrix(currentLight.GetPosition(), Vector3(0.0f, 0.0f, 0.0f));
+	else
+		viewMatrix = Matrix4::BuildViewMatrix(currentLight.GetPosition(), Vector3(RAW_HEIGHT * HEIGHTMAP_X, 0.0f, RAW_WIDTH * HEIGHTMAP_Z));
 	shadowMatrix = biasMatrix * (projMatrix * viewMatrix);
 	fboInUse = true;
 	DrawScene();
 	fboInUse = false;
 	ClearNodeLists();
 
-	//projMatrix = tempMatrix;
+	projMatrix = tempMatrix;
 
 	castShadows = false;
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -517,8 +523,8 @@ void Renderer::DeleteObjects()
 	delete rockMesh;
 	rockMesh = NULL;
 	// SECOND_SCENE
-	delete cubeMesh;
-	cubeMesh = NULL;
+	delete sphereMesh;
+	sphereMesh = NULL;
 	delete floorMesh;
 	floorMesh = NULL;
 
@@ -549,16 +555,8 @@ void Renderer::DeleteObjects()
 
 	delete mainLight;
 	mainLight = NULL;
-
-	if (!movingLightsVector.empty())
-	{
-		for (auto it = movingLightsVector.begin(); it != movingLightsVector.end(); it++)
-		{
-			delete *it;
-			*it = NULL;
-		}
-		ClearSTLVector(movingLightsVector);
-	}
+	delete movingLight;
+	movingLight = NULL;
 
 	delete dataFont;
 	dataFont = NULL;
@@ -618,39 +616,19 @@ void Renderer::DeleteTextures()
 	glDeleteFramebuffers(1, &postProcessingFBO);
 	glDeleteFramebuffers(1, &bufferFBO);
 	// SECOND_SCENE
-	glDeleteTextures(1, &cubeTexture);
 	glDeleteTextures(1, &shadowTexture);
 	glDeleteFramebuffers(1, &shadowFBO);
-}
-
-void Renderer::GenerateMultipleLights(int count)
-{
-	for (int i = 0; i < count; i++)
-	{
-		Vector2 randomPosition = GenerateRandomPosition((int)(RAW_HEIGHT * HEIGHTMAP_X), (int)(RAW_WIDTH * HEIGHTMAP_Z));
-		Light* tempLight = new Light(Vector3(randomPosition.x, 10000.0f, randomPosition.y), Vector4(1, 1, 1, 1), RAW_HEIGHT * HEIGHTMAP_X);
-		movingLightsVector.push_back(tempLight);
-	}
-}
-
-void Renderer::UpdateMovingLights(vector<Light*> lightsVector)
-{
-	for (vector<Light*>::iterator it = lightsVector.begin(); it != lightsVector.end(); it++)
-	{
-		MoveLight(*it, lightMovementDelta);
-	}
 }
 
 void Renderer::MoveLight(Light * l, float delta)
 {
 	l->SetMovementCounter(l->GetMovementCounter() + delta);
-	l->SetPosition(Vector3((RAW_HEIGHT * HEIGHTMAP_X) / 2.0f + l->GetMovementCounter(), l->GetPosition().y, (RAW_WIDTH * HEIGHTMAP_Z) / 2.0f + l->GetMovementCounter()));
+	l->SetPosition(Vector3(l->GetMovementCounter(), l->GetPosition().y, l->GetMovementCounter()));
 
-	if (l->GetMovementCounter() > 16000.0f)
+	if (l->GetMovementCounter() > RAW_HEIGHT * HEIGHTMAP_X)
 	{
-		l->SetMovementCounter(l->GetMovementCounter() - 32000.0f);
-		l->SetPosition(Vector3((RAW_HEIGHT * HEIGHTMAP_X) / 2.0f - l->GetMovementCounter(), l->GetPosition().y, (RAW_WIDTH * HEIGHTMAP_Z) / 2.0f - l->GetMovementCounter()));
-		l->SetMovementCounter(l->GetMovementCounter() - 16000.0f);
+		l->SetMovementCounter(0.0f);
+		l->SetPosition(Vector3(l->GetMovementCounter(), l->GetPosition().y, l->GetMovementCounter()));
 	}
 }
 
@@ -684,12 +662,13 @@ void Renderer::RenderText(const string & text)
 	}
 	if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE)
 	{
-		DrawText("Press [1] to reset the weather.", screenTextVector + screenTextPaddingVector * (float)v.size(), 16.0f);
-		DrawText("Press [2] to toggle snow.", screenTextVector + screenTextPaddingVector * (float)((int)v.size() + 1), 16.0f);
-		DrawText("Press [3] to toggle rain.", screenTextVector + screenTextPaddingVector * (float)((int)v.size() + 2), 16.0f);
+		DrawText("Press [1] to reset the weather", screenTextVector + screenTextPaddingVector * (float)v.size(), 16.0f);
+		DrawText("Press [2] to toggle snow", screenTextVector + screenTextPaddingVector * (float)((int)v.size() + 1), 16.0f);
+		DrawText("Press [3] to toggle rain", screenTextVector + screenTextPaddingVector * (float)((int)v.size() + 2), 16.0f);
+		DrawText("Press [4] to toggle shadow debug mode", screenTextVector + screenTextPaddingVector * (float)((int)v.size() + 3), 16.0f);
+		DrawText("Press [5] to toggle moving light mode", screenTextVector + screenTextPaddingVector * (float)((int)v.size() + 4), 16.0f);
 	}
 	ResetMVP();
-
 	glUseProgram(0);
 	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);
@@ -790,7 +769,7 @@ void Renderer::SetUniforms(SceneNode* n)
 	glUniform1f(glGetUniformLocation(GetCurrentShader()->GetProgram(), "terrainSize"), RAW_SIZE);
 	glUniform1f(glGetUniformLocation(GetCurrentShader()->GetProgram(), "terrainGridSize"), HEIGHTMAP_X);
 
-	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == cubeMesh ||
+	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == sphereMesh ||
 		n->GetMesh() == floorMesh)
 	{
 		glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), 4);
@@ -801,25 +780,26 @@ void Renderer::SetUniforms(SceneNode* n)
 	modelMatrix = n->GetWorldTransform() * Matrix4::Scale(n->GetModelScale());
 	UpdateShaderMatrices();
 
-	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == cubeMesh ||
+	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == sphereMesh ||
 		n->GetMesh() == floorMesh)
 	{
 		Matrix4 tempMatrix = shadowMatrix * modelMatrix;
 		glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "shadowMatrix"), 1, false, tempMatrix.values);
 	}
+
+	if (IsShadowDebuggingModeOn())
+		glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "shadowDebugMode"), true);
+	else
+		glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "shadowDebugMode"), false);
 }
 
 void Renderer::SetLighting(SceneNode * n)
 {
-	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == cubeMesh || 
+	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == sphereMesh || 
 		n->GetMesh() == floorMesh)
 	{
-		/// TODO: Change the shader to be able reflect multiple lights (i.e. add multiple light positions as uniforms, etc.)
-		if (renderRain)
-		{
-			for (int i = 0; i < (int)movingLightsVector.size(); i++)
-				SetShaderLight(*movingLightsVector.at(i));
-		}
+		if (IsMovingLightModeOn())
+			SetShaderLight(*movingLight);
 		else
 			SetShaderLight(*mainLight);
 	}
@@ -871,8 +851,8 @@ void Renderer::SwitchScenesUpdating()
 	switch (sceneCounter)
 	{
 	case FIRST_SCENE:
-		if (renderRain)
-			UpdateMovingLights(movingLightsVector);
+		if (IsMovingLightModeOn())
+			MoveLight(movingLight, lightMovementDelta);
 		UpdateWeather();
 		break;
 	case SECOND_SCENE:

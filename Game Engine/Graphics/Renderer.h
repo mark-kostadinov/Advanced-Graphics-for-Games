@@ -37,7 +37,8 @@ public:
 	void		SetCamera(Camera* c)					{ camera = c; }
 	Light*		GetMainLight() const					{ return mainLight; }
 	void		SetMainLight(Light* l)					{ mainLight = l; }
-	vector<Light*> GetMovingLightsVector() const		{ return movingLightsVector; }
+	Light*		GetMovingLight() const					{ return movingLight; }
+	void		SetMovingLight(Light* l)				{ movingLight = l; }
 	Font*		GetFont() const							{ return dataFont; }
 	void		SetFont(Font* f)						{ dataFont = f; }
 
@@ -54,8 +55,8 @@ public:
 	vector<SceneNode*> GetTreeNodesVector() const		{ return treeNodes; }
 	vector<SceneNode*> GetRockNodesVector() const		{ return rockNodes; }
 	// SECOND_SCENE
-	SceneNode*	GetCubeNode() const						{ return cubeNode; }
-	void		SetCubeNode(SceneNode* n)				{ cubeNode = n; }
+	SceneNode*	GetSphereNode() const					{ return sphereNode; }
+	void		SetSphereNode(SceneNode* n)				{ sphereNode = n; }
 	SceneNode*	GetFloorNode() const					{ return floorNode; }
 	void		SetFloorNode(SceneNode* n)				{ floorNode = n; }
 
@@ -78,8 +79,8 @@ public:
 	OBJMesh*	GetRockMesh() const						{ return rockMesh; }
 	void		SetRockMesh(OBJMesh* m)					{ rockMesh = m; }
 	// SECOND_SCENE
-	Mesh*		GetCubeMesh() const						{ return cubeMesh; }
-	void		SetCubeMesh(Mesh* m)					{ cubeMesh = m; }
+	OBJMesh*	GetSphereMesh() const					{ return sphereMesh; }
+	void		SetSphereMesh(OBJMesh* m)				{ sphereMesh = m; }
 	Mesh*		GetFloorMesh() const					{ return floorMesh; }
 	void		SetFloorMesh(Mesh* m)					{ floorMesh = m; }
 	
@@ -93,8 +94,6 @@ public:
 	GLuint		GetHeightMapBumpTexture() const			{ return heightMapBumpTexture; }
 	void		SetHeightMapBumpTexture(GLuint t)		{ heightMapBumpTexture = t; }
 	// SECOND_SCENE
-	GLuint		GetCubeTexture() const					{ return cubeTexture; }
-	void		SetCubeTexture(GLuint t)				{ cubeTexture = t; }
 	GLuint		GetShadowTexture() const				{ return shadowTexture; }
 	void		SetShadowTexture(GLuint t)				{ shadowTexture = t; }
 
@@ -119,7 +118,7 @@ public:
 	void		SetRainCollisionShader(Shader* s)		{ rainCollisionShader = s; }
 	Shader*		GetPostProcessingShader() const			{ return postProcessingShader; }
 	void		SetPostProcessingShader(Shader* s)		{ postProcessingShader = s; }
-	//Shader*		GetFogShader() const					{ return fogShader; }
+	//Shader*	GetFogShader() const					{ return fogShader; }
 	//void		SetFogShader(Shader* s)					{ fogShader = s; }
 	Shader*		GetFontShader() const					{ return fontShader; }
 	void		SetFontShader(Shader* s)				{ fontShader = s; }
@@ -132,6 +131,12 @@ public:
 	void		SetRenderRain(bool b)	{ renderRain = b; }
 	void		SetSnowOnce(bool b)		{ snowOnce = b; }
 	void		SetRainOnce(bool b)		{ rainOnce = b; }
+
+	// Toggling different modes
+	bool		IsShadowDebuggingModeOn() const			{ return shadowDebuggingMode; }
+	void		SetShadowDebuggingMode(bool b)			{ shadowDebuggingMode = b; }
+	bool		IsMovingLightModeOn() const				{ return movingLightMode; }
+	void		SetMovingLightMode(bool b)				{ movingLightMode = b; }
 
 	// Buffer for the data that comes from the performance timer
 	string textBuffer;
@@ -173,8 +178,6 @@ protected:
 	void	DeleteShaders();
 	void	DeleteTextures();
 
-	void	GenerateMultipleLights(int count);
-	void	UpdateMovingLights(vector<Light*> lightsVector);
 	void	MoveLight(Light* l, float delta);
 
 	void	RenderText(const string &text);
@@ -189,7 +192,7 @@ protected:
 
 	Camera*				camera;
 	Light*				mainLight;
-	vector<Light*>		movingLightsVector;
+	Light*				movingLight;
 
 	// FIRST_SCENE
 	SceneNode*			rootNodes[scenesCount];
@@ -200,7 +203,7 @@ protected:
 	vector<SceneNode*>	treeNodes;
 	vector<SceneNode*>	rockNodes;
 	// SECOND_SCENE
-	SceneNode*			cubeNode;
+	SceneNode*			sphereNode;
 	SceneNode*			floorNode;
 
 	// FIRST_SCENE
@@ -215,7 +218,7 @@ protected:
 	OBJMesh*		treeMesh;
 	OBJMesh*		rockMesh;
 	// SECOND_SCENE
-	Mesh*			cubeMesh;
+	OBJMesh*		sphereMesh;
 	Mesh*			floorMesh;
 
 	// FIRST_SCENE
@@ -224,7 +227,6 @@ protected:
 	GLuint		heightMapTexture;
 	GLuint		heightMapBumpTexture;
 	// SECOND_SCENE
-	GLuint		cubeTexture;
 
 	// FIRST_SCENE
 	GLuint		snowCollisionFBO;
@@ -269,6 +271,9 @@ protected:
 	float blurFactor = 1.0f;
 	bool fboInUse = false;
 	bool castShadows = false;
+
+	bool shadowDebuggingMode = false;
+	bool movingLightMode = false;
 
 	Frustum		frameFrustum;
 

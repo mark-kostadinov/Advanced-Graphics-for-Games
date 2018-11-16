@@ -10,6 +10,7 @@ uniform bool renderSnow;
 uniform bool renderRain;
 uniform float terrainSize;
 uniform float terrainGridSize;
+uniform bool shadowDebugMode;
 
 uniform vec3	cameraPos;
 uniform vec4	lightColour;
@@ -63,7 +64,7 @@ void main(void)
 		lambert *= shadow;	// looks cooler if it's stronger
 		vec3 colour	= diffuse.rgb * lightColour.rgb;
 		colour += (lightColour.rgb * sFactor) * 0.33;
-		float ambience = 0.85;
+		float ambience = 0.75;
 		
 		FragColour = vec4(colour * atten * lambert, diffuse.a);
 		FragColour.rgb += (diffuse.rgb * lightColour.rgb) * ambience;
@@ -81,7 +82,9 @@ void main(void)
 		}
 		
 		// Debug shadows
-		float t = textureProj(shadowTex, IN.shadowProj);
-		FragColour.rgb = vec3(t, t, t);
+		if (shadowDebugMode) {
+			float t = textureProj(shadowTex, IN.shadowProj);
+			FragColour.rgb = vec3(t, t, t);
+		}
 	}
 }

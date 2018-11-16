@@ -51,8 +51,7 @@ constexpr int numberOfTrees = 10;
 constexpr int numberOfRocks = 5;
 
 // Light definitions
-constexpr int movingLightsCount = 1;
-constexpr float lightMovementDelta = 50.0f;
+constexpr float lightMovementDelta = 10.0f;
 
 // Printing out function
 template <typename T>
@@ -90,4 +89,4 @@ static Vector2 GenerateRandomPosition(int maxX, int maxZ)
 	return result;
 }
 
-#define SHADOWSIZE 2048
+#define SHADOWSIZE 4096

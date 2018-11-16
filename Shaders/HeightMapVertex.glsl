@@ -49,7 +49,7 @@ void main(void)	{
 	OUT.binormal = normalize(normalMatrix * normalize(cross(normal, tangent)));
 	OUT.worldPos = (modelMatrix * vec4(position, 1.0)).xyz;
 	// The larger the scale of the scene, the smaller the normals need to be
-	OUT.shadowProj = (shadowMatrix * vec4(position + (normal * 0.01), 1));	
+	OUT.shadowProj = (shadowMatrix * vec4(position + (normal * 0.0075), 1));	
 
 	mat4 mvp = projMatrix * viewMatrix * modelMatrix;
 	gl_Position = mvp * vec4(newPos, 1.0);
