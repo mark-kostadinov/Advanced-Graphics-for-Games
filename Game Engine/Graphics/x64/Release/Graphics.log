@@ -1,8 +1,1 @@
-﻿  stdafx.cpp
-  Renderer.cpp
-c:\users\mark\desktop\uni\year 3\csc3224 computer games development\reactphysics3d\src\engine\dynamicsworld.h(421): warning C4267: 'return': conversion from 'size_t' to 'reactphysics3d::uint', possible loss of data
-c:\users\mark\desktop\uni\year 3\csc3224 computer games development\reactphysics3d\src\engine\dynamicsworld.h(429): warning C4267: 'return': conversion from 'size_t' to 'reactphysics3d::uint', possible loss of data
-c:\users\mark\desktop\uni\year 3\csc3224 computer games development\reactphysics3d\src\collision\trianglemesh.h(82): warning C4267: 'return': conversion from 'size_t' to 'reactphysics3d::uint', possible loss of data
-c:\users\mark\desktop\uni\year 3\csc3224 computer games development\reactphysics3d\src\collision\shapes\heightfieldshape.h(227): warning C4244: 'return': conversion from 'double' to 'reactphysics3d::decimal', possible loss of data
-c:\users\mark\desktop\uni\year 3\csc3224 computer games development\reactphysics3d\src\collision\shapes\heightfieldshape.h(235): warning C4244: 'return': conversion from 'reactphysics3d::decimal' to 'int', possible loss of data
-  Graphics.vcxproj -> C:\Users\Mark\Desktop\UNI\YEAR 3\CSC3224 Computer Games Development\Game Engine\x64\Release\Graphics.lib
+﻿  Graphics.vcxproj -> C:\Users\b5036861\GitHub\Advanced-Graphics-for-Games\Game Engine\x64\Release\Graphics.lib

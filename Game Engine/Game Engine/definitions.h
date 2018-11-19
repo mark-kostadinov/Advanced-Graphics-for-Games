@@ -16,7 +16,7 @@
 #include "../../FMOD/inc/fmod_errors.h"
 
 // Debugging functions
-//#define DEBUG
+#define DEBUG
 
 // Window global variables
 constexpr const char* programTitle = "CSC8502 Coursework";
@@ -34,7 +34,7 @@ typedef FMOD::Sound Sound;
 #define GL_GRAY						0.3f, 0.3f, 0.3f, 1.0f
 
 // Time definitions
-constexpr float sceneCycleTimeMS = 30000.0f; // i.e. 30 sec
+constexpr float sceneCycleTimeMS = 10000.0f; // i.e. 30 sec
 constexpr float sceneTransitionTime = 5000.0f; // i.e. 5 sec
 constexpr float sceneTransitionRate = 1.f / sceneTransitionTime;
 

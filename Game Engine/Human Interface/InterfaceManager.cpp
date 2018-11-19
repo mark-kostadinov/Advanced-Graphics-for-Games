@@ -72,7 +72,8 @@ void InterfaceManager::Update()
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_P))
 		ToggleSceneSwitching();
 	// Switch scenes automatically after a certain period of time has passed
-	SwitchScenesAutomatically();
+	if (GetSceneManager()->IsSceneCyclingAllowed())
+		SwitchScenesAutomatically();
 }
 
 void InterfaceManager::ToggleSceneSwitching()
@@ -98,7 +99,7 @@ void InterfaceManager::SwitchScenesAutomatically()
 		PrintToConsole("Scene timer: " + ToString(GetSceneManager()->GetSceneTimer()->GetMS()), 1);
 #endif // DEBUG
 
-	if (GetSceneManager()->IsSceneCyclingAllowed() && GetSceneManager()->GetSceneTimer()->GetMS() >= sceneCycleTimeMS)
+	if (GetSceneManager()->GetSceneTimer()->GetMS() >= sceneCycleTimeMS)
 	{
 		SwitchToNextScene();
 		GetSceneManager()->GetSceneTimer()->Reset();
@@ -111,6 +112,7 @@ void InterfaceManager::SwitchToNextScene()
 		GetSceneManager()->SetCurrentScene(FIRST_SCENE);
 	else
 		GetSceneManager()->SetCurrentScene(GetSceneManager()->GetCurrentScene() + 1);
+	GetSceneManager()->GetSceneTimer()->Reset();
 #ifdef DEBUG
 	PrintToConsole("Current scene: " + to_string(GetSceneManager()->GetCurrentScene()), 1);
 #endif // DEBUG
@@ -122,6 +124,7 @@ void InterfaceManager::SwitchToPreviousScene()
 		GetSceneManager()->SetCurrentScene(FINAL_SCENE);
 	else
 		GetSceneManager()->SetCurrentScene(GetSceneManager()->GetCurrentScene() - 1);
+	GetSceneManager()->GetSceneTimer()->Reset();
 #ifdef DEBUG
 	PrintToConsole("Current scene: " + to_string(GetSceneManager()->GetCurrentScene()), 1);
 #endif // DEBUG

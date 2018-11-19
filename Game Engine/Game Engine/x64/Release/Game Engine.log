@@ -1,2 +1,1 @@
-﻿  main.cpp
-c:\users\mark\desktop\uni\year 3\csc3224 computer games development\game engine\game engine\main.cpp(4): fatal error C1083: Cannot open include file: 'fmod.hpp': No such file or directory
+﻿LINK : fatal error LNK1181: cannot open input file 'kernel32.lib'

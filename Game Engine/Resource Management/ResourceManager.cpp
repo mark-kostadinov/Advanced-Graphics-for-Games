@@ -50,13 +50,16 @@ void ResourceManager::LoadShaders()
 	GetRenderer()->SetFontShader(new Shader(SHADERDIR"TexturedVertex.glsl", SHADERDIR"TexturedFragment.glsl"));
 	// SECOND_SCENE
 	GetRenderer()->SetShadowShader(new Shader(SHADERDIR"ShadowVertex.glsl", SHADERDIR"ShadowFragment.glsl"));
+	GetRenderer()->SetReflectionShader(new Shader(SHADERDIR"ReflectionVertex.glsl", SHADERDIR"ReflectionFragment.glsl"));
+	GetRenderer()->SetReflectiveTextureShader(new Shader(SHADERDIR"ReflectiveTextureVertex.glsl", SHADERDIR"ReflectiveTextureFragment.glsl"));
 
 	if (!GetRenderer()->GetDefaultShader()->LinkProgram() || !GetRenderer()->GetSceneNodeShader()->LinkProgram() ||
 		!GetRenderer()->GetSceneObjectShader()->LinkProgram() || !GetRenderer()->GetSkyboxShader()->LinkProgram() || 
 		!GetRenderer()->GetHeightMapShader()->LinkProgram() || !GetRenderer()->GetSnowParticleShader()->LinkProgram() || 
 		!GetRenderer()->GetRainParticleShader()->LinkProgram() || !GetRenderer()->GetSnowCollisionShader()->LinkProgram() || 
 		!GetRenderer()->GetRainCollisionShader()->LinkProgram() || !GetRenderer()->GetPostProcessingShader()->LinkProgram() || 
-		!GetRenderer()->GetFontShader()->LinkProgram() || !GetRenderer()->GetShadowShader()->LinkProgram()) // !GetRenderer()->GetFogShader()->LinkProgram()
+		!GetRenderer()->GetFontShader()->LinkProgram() || !GetRenderer()->GetShadowShader()->LinkProgram() || 
+		!GetRenderer()->GetReflectionShader()->LinkProgram() || !GetRenderer()->GetReflectiveTextureShader()->LinkProgram()) // !GetRenderer()->GetFogShader()->LinkProgram()
 	{
 		PrintToConsole("Could not link one of the shaders!", 1);
 		return;
@@ -92,6 +95,10 @@ void ResourceManager::LoadTextures()
 		TEXTUREDIR"tahoma.TGA", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT), 16, 16));
 
 	// SECOND_SCENE
+	GetRenderer()->SetCubeMapSpaceTexture(SOIL_load_OGL_cubemap(
+		TEXTUREDIR"sor_cwd/cwd_lf.JPG", TEXTUREDIR"sor_cwd/cwd_rt.JPG", TEXTUREDIR"sor_cwd/cwd_up.JPG",
+		TEXTUREDIR"sor_cwd/cwd_dn.JPG", TEXTUREDIR"sor_cwd/cwd_ft.JPG", TEXTUREDIR"sor_cwd/cwd_bk.JPG",
+		SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0));
 
 	CheckTextureLoading();
 }
@@ -134,6 +141,12 @@ void ResourceManager::CheckTextureLoading()
 	}
 
 	// SECOND_SCENE
+	if (!GetRenderer()->GetCubeMapSpaceTexture())
+	{
+		PrintToConsole("Could not load the space cubeMap texture!", 1);
+		return;
+	}
+	GetRenderer()->SetTextureRepeating(GetRenderer()->GetCubeMapSpaceTexture(), true);
 }
 
 void ResourceManager::SetMeshes()
@@ -177,17 +190,19 @@ void ResourceManager::SetMeshes()
 	EnableAnisotropicFiltering(GetRenderer()->GetRockMesh()->GetTexture(), largestSupportedAnisotropyLevel);
 
 	// SECOND_SCENE
-	GetRenderer()->SetSphereMesh(new OBJMesh());
-	GetRenderer()->GetSphereMesh()->LoadOBJMesh(MESHDIR"sphere.obj");
-	//EnableAnisotropicFiltering(GetRenderer()->GetSphereMesh()->GetTexture(), largestSupportedAnisotropyLevel);
-
-	GetRenderer()->SetFloorMesh(Mesh::GenerateQuad());
-	GetRenderer()->GetFloorMesh()->SetTexture(GetRenderer()->GetHeightMapTexture());
-	if (!GetRenderer()->GetFloorMesh()->GetTexture())
+	GetRenderer()->SetTexturedSphereMesh(new OBJMesh());
+	GetRenderer()->GetTexturedSphereMesh()->LoadOBJMesh(MESHDIR"texturedSphere.obj");
+	GetRenderer()->GetTexturedSphereMesh()->SetTexture(SOIL_load_OGL_texture(TEXTUREDIR"earth.JPG",
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS)); /// TODO: add a GLuint
+	if (!GetRenderer()->GetTexturedSphereMesh()->GetTexture())
 	{
-		PrintToConsole("Could not load the floor texture!", 1);
+		PrintToConsole("Could not load the textured sphere texture!", 1);
 		return;
 	}
+	EnableAnisotropicFiltering(GetRenderer()->GetTexturedSphereMesh()->GetTexture(), largestSupportedAnisotropyLevel);
+
+	GetRenderer()->SetReflectiveMesh(new OBJMesh());
+	GetRenderer()->GetReflectiveMesh()->LoadOBJMesh(MESHDIR"reflectiveSphere.obj");
 }
 
 void ResourceManager::SetSceneNodes()
@@ -245,17 +260,17 @@ void ResourceManager::SetSceneNodes()
 	}
 
 	// SECOND_SCENE
-	GetRenderer()->SetSphereNode(new SceneNode(GetRenderer()->GetSphereMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader()));
-	GetRenderer()->GetSphereNode()->SetTransform(Matrix4::Translation(Vector3(3000.0f, 1000.0f, 3000.0f)) * defaultRotationMatrix);
-	GetRenderer()->GetSphereNode()->SetModelScale(Vector3(50.0f, 50.0f, 50.0f));
-	GetRenderer()->GetSphereNode()->SetBoundingRadius(5000.0f);
-	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetSphereNode());
+	GetRenderer()->SetTexturedSphereNode(new SceneNode(GetRenderer()->GetTexturedSphereMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader()));
+	GetRenderer()->GetTexturedSphereNode()->SetTransform(Matrix4::Translation(Vector3(3000.0f, 1000.0f, 3000.0f)) * defaultRotationMatrix);
+	GetRenderer()->GetTexturedSphereNode()->SetModelScale(Vector3(50.0f, 50.0f, 50.0f));
+	GetRenderer()->GetTexturedSphereNode()->SetBoundingRadius(5000.0f);
+	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetTexturedSphereNode());
 
-	GetRenderer()->SetFloorNode(new SceneNode(GetRenderer()->GetFloorMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader()));
-	GetRenderer()->GetFloorNode()->SetTransform(Matrix4::Translation(Vector3(3000.0f, 0.0f, 3000.0f)) * Matrix4::Rotation(90.0f, Vector3(1.0f, 0.0f, 0.0f)));
-	GetRenderer()->GetFloorNode()->SetModelScale(Vector3(5000.0f, 5000.0f, 5000.0f));
-	GetRenderer()->GetFloorNode()->SetBoundingRadius(10000.0f);
-	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetFloorNode());
+	GetRenderer()->SetReflectiveSphereNode(new SceneNode(GetRenderer()->GetReflectiveMesh(), defaultTransparentColourVector, GetRenderer()->GetReflectionShader()));
+	GetRenderer()->GetReflectiveSphereNode()->SetTransform(Matrix4::Translation(Vector3(0.0f, 1000.0f, 0.0f)) * defaultRotationMatrix);
+	GetRenderer()->GetReflectiveSphereNode()->SetModelScale(Vector3(500.0f, 500.0f, 500.0f));
+	GetRenderer()->GetReflectiveSphereNode()->SetBoundingRadius(5000.0f);
+	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetReflectiveSphereNode());
 
 	// FINAL_SCENE
 }

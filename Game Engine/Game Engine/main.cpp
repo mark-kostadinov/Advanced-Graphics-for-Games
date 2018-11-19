@@ -13,7 +13,7 @@ int main()
 #ifdef DEBUG
 	GLint extCount = 0;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &extCount);
-	PrintToConsole("Number of extensions supported: " + to_string(extCount), 1);
+	PrintToConsole("Number of extensions supported: " + to_string(extCount), 2);
 #endif // DEBUG
 
 	Window w(programTitle, windowSizeX, windowSizeY, fullScreen);

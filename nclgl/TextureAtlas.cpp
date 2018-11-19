@@ -149,7 +149,7 @@ void	TextureAtlas::BuildMipMaps() const
 	*/
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, border / 2);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, border / 2);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, (GLfloat)(border / 2));
 
 	glGenerateMipmap(GL_TEXTURE_2D);
 

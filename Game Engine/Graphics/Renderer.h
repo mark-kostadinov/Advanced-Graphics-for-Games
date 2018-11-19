@@ -55,10 +55,10 @@ public:
 	vector<SceneNode*> GetTreeNodesVector() const		{ return treeNodes; }
 	vector<SceneNode*> GetRockNodesVector() const		{ return rockNodes; }
 	// SECOND_SCENE
-	SceneNode*	GetSphereNode() const					{ return sphereNode; }
-	void		SetSphereNode(SceneNode* n)				{ sphereNode = n; }
-	SceneNode*	GetFloorNode() const					{ return floorNode; }
-	void		SetFloorNode(SceneNode* n)				{ floorNode = n; }
+	SceneNode*	GetTexturedSphereNode() const			{ return texturedSphereNode; }
+	void		SetTexturedSphereNode(SceneNode* n)		{ texturedSphereNode = n; }
+	SceneNode*	GetReflectiveSphereNode() const			{ return reflectiveSphereNode; }
+	void		SetReflectiveSphereNode(SceneNode* n)	{ reflectiveSphereNode = n; }
 
 	HeightMap*	GetHeightMap() const					{ return heightMap; }
 	void		SetHeightMap(HeightMap* h)				{ heightMap = h; }
@@ -79,10 +79,10 @@ public:
 	OBJMesh*	GetRockMesh() const						{ return rockMesh; }
 	void		SetRockMesh(OBJMesh* m)					{ rockMesh = m; }
 	// SECOND_SCENE
-	OBJMesh*	GetSphereMesh() const					{ return sphereMesh; }
-	void		SetSphereMesh(OBJMesh* m)				{ sphereMesh = m; }
-	Mesh*		GetFloorMesh() const					{ return floorMesh; }
-	void		SetFloorMesh(Mesh* m)					{ floorMesh = m; }
+	OBJMesh*	GetTexturedSphereMesh() const			{ return texturedSphereMesh; }
+	void		SetTexturedSphereMesh(OBJMesh* m)		{ texturedSphereMesh = m; }
+	OBJMesh*	GetReflectiveMesh() const				{ return reflectiveSphereMesh; }
+	void		SetReflectiveMesh(OBJMesh* m)			{ reflectiveSphereMesh = m; }
 	
 	// FIRST_SCENE
 	GLuint		GetCubeMapSunnyTexture() const			{ return cubeMapSunnyTexture; }
@@ -96,6 +96,10 @@ public:
 	// SECOND_SCENE
 	GLuint		GetShadowTexture() const				{ return shadowTexture; }
 	void		SetShadowTexture(GLuint t)				{ shadowTexture = t; }
+	GLuint		GetCubeMapSpaceTexture() const			{ return cubeMapSpaceTexture; }
+	void		SetCubeMapSpaceTexture(GLuint t)		{ cubeMapSpaceTexture = t; }
+	GLuint		GetReflectiveColourTexture() const		{ return reflectiveColourTexture; }
+	void		SetReflectiveColourTexture(GLuint t)	{ reflectiveColourTexture = t; }
 
 	// FIRST_SCENE
 	Shader*		GetDefaultShader() const				{ return defaultShader; }
@@ -125,6 +129,10 @@ public:
 	// SECOND_SCENE
 	Shader*		GetShadowShader() const					{ return shadowShader; }
 	void		SetShadowShader(Shader* s)				{ shadowShader = s; }
+	Shader*		GetReflectionShader() const				{ return reflectionShader; }
+	void		SetReflectionShader(Shader* s)			{ reflectionShader = s; }
+	Shader*		GetReflectiveTextureShader() const		{ return reflectiveTextureShader; }
+	void		SetReflectiveTextureShader(Shader* s)	{ reflectiveTextureShader = s; }
 
 	// Snow and rain rendering booleans
 	void		SetRenderSnow(bool b)	{ renderSnow = b; }
@@ -155,6 +163,7 @@ protected:
 	void	DrawScene();
 	void	DrawShadowScene();
 	void	ApplyPostProcessEffects();
+	void	ResetPPFX();
 
 	void	SetShaderParticleSize(float f);
 	void	DrawSkybox();
@@ -163,6 +172,7 @@ protected:
 	void	GenerateColourTextureFBO(GLuint &texture);
 	void	AttachTexturesFBO(GLuint &fbo, GLuint &colourTexture, GLuint &depthTexture);
 	void	DrawParticleCollisionFBO();
+	void	DrawReflectiveTextureFBO();
 
 	void	DrawFog();
 	void	DrawPostProcess();
@@ -203,8 +213,8 @@ protected:
 	vector<SceneNode*>	treeNodes;
 	vector<SceneNode*>	rockNodes;
 	// SECOND_SCENE
-	SceneNode*			sphereNode;
-	SceneNode*			floorNode;
+	SceneNode*			texturedSphereNode;
+	SceneNode*			reflectiveSphereNode;
 
 	// FIRST_SCENE
 	Font*			dataFont;
@@ -218,8 +228,8 @@ protected:
 	OBJMesh*		treeMesh;
 	OBJMesh*		rockMesh;
 	// SECOND_SCENE
-	OBJMesh*		sphereMesh;
-	Mesh*			floorMesh;
+	OBJMesh*		texturedSphereMesh;
+	OBJMesh*		reflectiveSphereMesh;
 
 	// FIRST_SCENE
 	GLuint		cubeMapSunnyTexture;
@@ -227,6 +237,7 @@ protected:
 	GLuint		heightMapTexture;
 	GLuint		heightMapBumpTexture;
 	// SECOND_SCENE
+	GLuint		cubeMapSpaceTexture;
 
 	// FIRST_SCENE
 	GLuint		snowCollisionFBO;
@@ -244,6 +255,8 @@ protected:
 	// SECOND_SCENE
 	GLuint		shadowFBO;
 	GLuint		shadowTexture;
+	GLuint		reflectiveTextureFBO;
+	GLuint		reflectiveColourTexture;
 
 	// FIRST_SCENE
 	Shader*		defaultShader;
@@ -260,6 +273,8 @@ protected:
 	Shader*		fontShader;
 	// SECOND_SCENE
 	Shader*		shadowShader;
+	Shader*		reflectionShader;
+	Shader*		reflectiveTextureShader;
 
 	bool renderSnow = false;
 	bool renderRain = false;

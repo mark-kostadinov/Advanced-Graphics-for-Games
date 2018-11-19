@@ -68,5 +68,8 @@ void main()
 			float t = textureProj(shadowTex, IN.shadowProj);
 			FragColour.rgb = vec3(t, t, t);
 		}
+		
+		// Check if it has a texture
+		//FragColour.rg = IN.texCoord;
 	}
 }
