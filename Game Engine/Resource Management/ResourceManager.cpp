@@ -96,8 +96,8 @@ void ResourceManager::LoadTextures()
 
 	// SECOND_SCENE
 	GetRenderer()->SetCubeMapSpaceTexture(SOIL_load_OGL_cubemap(
-		TEXTUREDIR"sor_cwd/cwd_lf.JPG", TEXTUREDIR"sor_cwd/cwd_rt.JPG", TEXTUREDIR"sor_cwd/cwd_up.JPG",
-		TEXTUREDIR"sor_cwd/cwd_dn.JPG", TEXTUREDIR"sor_cwd/cwd_ft.JPG", TEXTUREDIR"sor_cwd/cwd_bk.JPG",
+		TEXTUREDIR"Space/Right.PNG", TEXTUREDIR"Space/Left.PNG", TEXTUREDIR"Space/Top.PNG",
+		TEXTUREDIR"Space/Bottom.PNG", TEXTUREDIR"Space/Front.PNG", TEXTUREDIR"Space/Back.PNG",
 		SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0));
 
 	CheckTextureLoading();
@@ -261,15 +261,15 @@ void ResourceManager::SetSceneNodes()
 
 	// SECOND_SCENE
 	GetRenderer()->SetTexturedSphereNode(new SceneNode(GetRenderer()->GetTexturedSphereMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader()));
-	GetRenderer()->GetTexturedSphereNode()->SetTransform(Matrix4::Translation(Vector3(3000.0f, 1000.0f, 3000.0f)) * defaultRotationMatrix);
-	GetRenderer()->GetTexturedSphereNode()->SetModelScale(Vector3(50.0f, 50.0f, 50.0f));
-	GetRenderer()->GetTexturedSphereNode()->SetBoundingRadius(5000.0f);
+	GetRenderer()->GetTexturedSphereNode()->SetTransform(Matrix4::Translation(Vector3(0.0f, 1000.0f, 0.0f)) * defaultRotationMatrix);
+	GetRenderer()->GetTexturedSphereNode()->SetModelScale(Vector3(100.0f, 100.0f, 100.0f));
+	GetRenderer()->GetTexturedSphereNode()->SetBoundingRadius(10000.0f);
 	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetTexturedSphereNode());
 
-	GetRenderer()->SetReflectiveSphereNode(new SceneNode(GetRenderer()->GetReflectiveMesh(), defaultTransparentColourVector, GetRenderer()->GetReflectionShader()));
-	GetRenderer()->GetReflectiveSphereNode()->SetTransform(Matrix4::Translation(Vector3(0.0f, 1000.0f, 0.0f)) * defaultRotationMatrix);
-	GetRenderer()->GetReflectiveSphereNode()->SetModelScale(Vector3(500.0f, 500.0f, 500.0f));
-	GetRenderer()->GetReflectiveSphereNode()->SetBoundingRadius(5000.0f);
+	GetRenderer()->SetReflectiveSphereNode(new SceneNode(GetRenderer()->GetReflectiveMesh(), defaultOpaqueColourVector, GetRenderer()->GetReflectionShader()));
+	GetRenderer()->GetReflectiveSphereNode()->SetTransform(Matrix4::Translation(Vector3(10000.0f, 1250.0f, 10000.0f)) * defaultRotationMatrix);
+	GetRenderer()->GetReflectiveSphereNode()->SetModelScale(Vector3(500.0f, 1250.0f, 500.0f));
+	GetRenderer()->GetReflectiveSphereNode()->SetBoundingRadius(10000.0f);
 	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetReflectiveSphereNode());
 
 	// FINAL_SCENE

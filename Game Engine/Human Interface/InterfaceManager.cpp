@@ -24,7 +24,7 @@ void InterfaceManager::Update()
 		GetRenderer()->GetCamera()->SetPosition(Vector3(-1000.0f, 1000.0f, -1000.0f));
 #endif // DEBUG
 
-	if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE)
+	if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE || GetSceneManager()->GetCurrentScene() == SECOND_SCENE)
 	{
 		// Go back to normal weather
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_1))
@@ -104,6 +104,7 @@ void InterfaceManager::SwitchScenesAutomatically()
 		SwitchToNextScene();
 		GetSceneManager()->GetSceneTimer()->Reset();
 	}
+	r->UpdateCameraPosition();
 }
 
 void InterfaceManager::SwitchToNextScene()
@@ -116,6 +117,7 @@ void InterfaceManager::SwitchToNextScene()
 #ifdef DEBUG
 	PrintToConsole("Current scene: " + to_string(GetSceneManager()->GetCurrentScene()), 1);
 #endif // DEBUG
+	r->UpdateCameraPosition();
 }
 
 void InterfaceManager::SwitchToPreviousScene()
@@ -128,4 +130,5 @@ void InterfaceManager::SwitchToPreviousScene()
 #ifdef DEBUG
 	PrintToConsole("Current scene: " + to_string(GetSceneManager()->GetCurrentScene()), 1);
 #endif // DEBUG
+	r->UpdateCameraPosition();
 }

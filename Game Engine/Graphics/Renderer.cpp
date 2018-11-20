@@ -45,12 +45,16 @@ void Renderer::UpdateScene(float msec)
 	viewMatrix = camera->BuildViewMatrix();
 	frameFrustum.FromMatrix(projMatrix*viewMatrix);
 
+	UpdateLight(mainLight);
+	if (IsMovingLightModeOn())
+		MoveLight(movingLight, lightMovementDelta); /// Fix the function for the new moving light body
+
 	SwitchScenesUpdating();
 }
 
 void Renderer::RenderScene()
 {
-	glClearColor(GL_GRAY);
+	glClearColor(GL_BLACK);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// If it is time to change the scene, apply some post-processing effects on it
@@ -89,6 +93,7 @@ void Renderer::RenderScene()
 
 void Renderer::DrawScene()
 {
+	DrawSkybox();
 	SwitchScenesRendering();
 	SortNodeLists();
 	DrawNodes();
@@ -670,6 +675,22 @@ void Renderer::DeleteTextures()
 	glDeleteFramebuffers(1, &shadowFBO);
 }
 
+void Renderer::UpdateLight(Light * l)
+{
+	if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE)
+	{
+		mainLight->SetPosition(Vector3(-4000.0f, 10000.0f, -4000.0f));
+		mainLight->SetColour(Vector4(1, 1, 1, 1));
+		mainLight->SetRadius(RAW_HEIGHT * HEIGHTMAP_X * 6.0f);
+	}
+	else if (GetSceneManager()->GetCurrentScene() == SECOND_SCENE)
+	{
+		mainLight->SetPosition(Vector3(-30000.0f, 2000.0f, -10000.0f));
+		mainLight->SetColour(Vector4(0.95f, 1.0f, 0.9f, 1.0f));
+		mainLight->SetRadius(RAW_HEIGHT * HEIGHTMAP_X * 3.0f);
+	}
+}
+
 void Renderer::MoveLight(Light * l, float delta)
 {
 	l->SetMovementCounter(l->GetMovementCounter() + delta);
@@ -679,6 +700,36 @@ void Renderer::MoveLight(Light * l, float delta)
 	{
 		l->SetMovementCounter(0.0f);
 		l->SetPosition(Vector3(l->GetMovementCounter(), l->GetPosition().y, l->GetMovementCounter()));
+	}
+}
+
+void Renderer::UpdatePlanets()
+{
+	GetTexturedSphereNode()->SetTransform(Matrix4::Translation(GetTexturedSphereNode()->GetTransform().GetPositionVector()) * Matrix4::Rotation(planetRotationAngle, Vector3(0.0f, 1.0f, 0.0f)));
+
+	float radius = 10000.0f;
+	float x = cos(planetRotationAngle * 0.05f) * radius;
+	float y = sin(planetRotationAngle * 0.05f) * radius;
+
+	GetReflectiveSphereNode()->SetTransform(Matrix4::Translation(Vector3(x, GetReflectiveSphereNode()->GetTransform().GetPositionVector().y, y)));
+
+	planetRotationAngle += 0.1f;
+	if (planetRotationAngle > 360.0f)
+		planetRotationAngle = 0.1f;
+}
+
+/// TODO: Fix LookAt()
+void Renderer::UpdateCameraPosition()
+{
+	if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE)
+	{
+		camera->SetPosition(Vector3(0.0f, 7000.0f, 20000.0f));
+		//viewMatrix = Matrix4::BuildViewMatrix(camera->GetPosition(), Vector3(0, 0, 0));
+	}
+	else if (GetSceneManager()->GetCurrentScene() == SECOND_SCENE)
+	{
+		camera->SetPosition(Vector3(7000.0f, 2500.0f, -12000.0f));
+		//viewMatrix = Matrix4::BuildViewMatrix(camera->GetPosition(), Vector3(0, 0, 0));
 	}
 }
 
@@ -718,6 +769,12 @@ void Renderer::RenderText(const string & text)
 		DrawText("Press [4] to toggle shadow debug mode", screenTextVector + screenTextPaddingVector * (float)((int)v.size() + 3), 16.0f);
 		DrawText("Press [5] to toggle moving light mode", screenTextVector + screenTextPaddingVector * (float)((int)v.size() + 4), 16.0f);
 	}
+	if (GetSceneManager()->GetCurrentScene() == SECOND_SCENE || GetSceneManager()->GetCurrentScene() == FINAL_SCENE)
+	{
+		DrawText("Press [4] to toggle shadow debug mode", screenTextVector + screenTextPaddingVector * (float)v.size(), 16.0f);
+		DrawText("Press [5] to toggle moving light mode", screenTextVector + screenTextPaddingVector * (float)((int)v.size() + 1), 16.0f);
+	}
+
 	ResetMVP();
 	glUseProgram(0);
 	glDisable(GL_BLEND);
@@ -887,15 +944,12 @@ void Renderer::SwitchScenesRendering()
 	switch (sceneCounter)
 	{
 	case FIRST_SCENE:
-		DrawSkybox();
 		if (!fboInUse)
 			RenderWeather();
 		break;
 	case SECOND_SCENE:
-		DrawSkybox();
 		break;
 	case FINAL_SCENE:
-		/// TODO
 		break;
 	default:
 		PrintToConsole("Something went wrong in the Renderer when switching the scenes while Rendering.", 1);
@@ -911,19 +965,12 @@ void Renderer::SwitchScenesUpdating()
 	switch (sceneCounter)
 	{
 	case FIRST_SCENE:
-		mainLight->SetPosition(Vector3(-4000.0f, 10000.0f, -4000.0f));
-		if (IsMovingLightModeOn())
-			MoveLight(movingLight, lightMovementDelta);
 		UpdateWeather();
 		break;
 	case SECOND_SCENE:
-		/// TODO
-		mainLight->SetPosition(Vector3(-4000.0f, 10000.0f, -4000.0f)); /// TODO: Set it to where the sun is going to be
-		if (IsMovingLightModeOn())
-			MoveLight(movingLight, lightMovementDelta); /// Fix the function for the new moving light body
+		UpdatePlanets();
 		break;
 	case FINAL_SCENE:
-		/// TODO
 		break;
 	default:
 		PrintToConsole("Something went wrong in the Renderer when switching the scenes while Updating.", 1);
@@ -961,7 +1008,7 @@ void Renderer::DrawSkybox()
 			skyMesh->SetTexture(cubeMapSunnyTexture);
 		}
 	}
-	else if (GetSceneManager()->GetCurrentScene() == SECOND_SCENE)
+	else if (GetSceneManager()->GetCurrentScene() == SECOND_SCENE || GetSceneManager()->GetCurrentScene() == FINAL_SCENE)
 	{
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapSpaceTexture);
 		skyMesh->SetTexture(cubeMapSpaceTexture);

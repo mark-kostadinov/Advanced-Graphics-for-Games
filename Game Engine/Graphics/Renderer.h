@@ -27,6 +27,7 @@ public:
 	virtual void RenderScene();
 
 	void	ResetWeatherConditions();
+	void	UpdateCameraPosition();
 
 	Window*			GetWindow() const							{ return w; }
 	void			SetWindow(Window* w)						{ this->w = w; }
@@ -188,7 +189,9 @@ protected:
 	void	DeleteShaders();
 	void	DeleteTextures();
 
+	void	UpdateLight(Light* l);
 	void	MoveLight(Light* l, float delta);
+	void	UpdatePlanets();
 
 	void	RenderText(const string &text);
 	void	SplitText(vector<string> &v, const string &text);
@@ -284,6 +287,7 @@ protected:
 	float msec = 0.0f;
 	float alphaFade = 1.0f;
 	float blurFactor = 1.0f;
+	float planetRotationAngle = 0.1f;
 	bool fboInUse = false;
 	bool castShadows = false;
 
