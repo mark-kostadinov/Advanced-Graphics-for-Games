@@ -24,7 +24,7 @@ void InterfaceManager::Update()
 		GetRenderer()->GetCamera()->SetPosition(Vector3(-1000.0f, 1000.0f, -1000.0f));
 #endif // DEBUG
 
-	if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE || GetSceneManager()->GetCurrentScene() == SECOND_SCENE)
+	if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE)
 	{
 		// Go back to normal weather
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_1))
@@ -81,10 +81,8 @@ void InterfaceManager::ToggleSceneSwitching()
 	if (GetSceneManager()->IsSceneCyclingAllowed())
 		GetSceneManager()->SetSceneCyclingAllowed(false);
 	else
-	{
 		GetSceneManager()->SetSceneCyclingAllowed(true);
-		GetSceneManager()->GetSceneTimer()->Reset();
-	}
+	GetSceneManager()->GetSceneTimer()->Reset();
 
 #ifdef DEBUG
 	if (GetSceneManager()->IsSceneCyclingAllowed())
@@ -100,19 +98,22 @@ void InterfaceManager::SwitchScenesAutomatically()
 #endif // DEBUG
 
 	if (GetSceneManager()->GetSceneTimer()->GetMS() >= sceneCycleTimeMS)
-	{
 		SwitchToNextScene();
-		GetSceneManager()->GetSceneTimer()->Reset();
-	}
-	r->UpdateCameraPosition();
 }
 
 void InterfaceManager::SwitchToNextScene()
 {
-	if (GetSceneManager()->GetCurrentScene() == FINAL_SCENE)
-		GetSceneManager()->SetCurrentScene(FIRST_SCENE);
+	if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE && r->isFirstMiniScene || 
+		GetSceneManager()->GetCurrentScene() == FIRST_SCENE && r->isSecondMiniScene)
+		goto next;
 	else
-		GetSceneManager()->SetCurrentScene(GetSceneManager()->GetCurrentScene() + 1);
+	{
+		if (GetSceneManager()->GetCurrentScene() == FINAL_SCENE)
+			GetSceneManager()->SetCurrentScene(FIRST_SCENE);
+		else
+			GetSceneManager()->SetCurrentScene(GetSceneManager()->GetCurrentScene() + 1);
+	}
+next:
 	GetSceneManager()->GetSceneTimer()->Reset();
 #ifdef DEBUG
 	PrintToConsole("Current scene: " + to_string(GetSceneManager()->GetCurrentScene()), 1);

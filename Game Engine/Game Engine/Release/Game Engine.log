@@ -1,20 +1,21 @@
-﻿  main.cpp
-  SceneManager.cpp
-MSVCRT.lib(initializers.obj) : warning LNK4098: defaultlib 'libcmt.lib' conflicts with use of other libs; use /NODEFAULTLIB:library
+﻿MSVCRT.lib(initializers.obj) : warning LNK4098: defaultlib 'libcmt.lib' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  All 1629 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  0 of 1647 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniformMatrix4fv imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewActiveTexture imported
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniform4fv imported
-Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniform3fv imported
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewDeleteFramebuffers imported
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniform2f imported
+Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniform3fv imported
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniform1i imported
+Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewActiveTexture imported
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewGetUniformLocation imported
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUniform1f imported
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewCheckFramebufferStatus imported
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewFramebufferTexture2D imported
+Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewFramebufferTexture imported
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewGenFramebuffers imported
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewUseProgram imported
 Graphics.lib(Renderer.obj) : warning LNK4049: locally defined symbol ___glewBindFramebuffer imported

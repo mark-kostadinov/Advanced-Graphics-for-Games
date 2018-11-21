@@ -25,7 +25,7 @@ _-_-_-_-_-_-_-""  ""
 class SceneNode
 {
 public:
-	SceneNode(Mesh*m = NULL, Vector4 colour = Vector4(1, 1, 1, 1), Shader* shader = NULL);
+	SceneNode(Mesh*m = NULL, Vector4 colour = Vector4(1, 1, 1, 1), Shader* shader = NULL, Light* light = NULL);
 	~SceneNode(void);
 
 	void			SetTransform(const Matrix4 &matrix) { transform = matrix; }
@@ -50,11 +50,15 @@ public:
 	float			GetCameraDistance() const { return distanceFromCamera; }
 	void			SetCameraDistance(float f) { distanceFromCamera = f; }
 
-	void			SetMesh(Mesh*m) { mesh = m; }
 	Mesh*			GetMesh() { return mesh; }
+	void			SetMesh(Mesh* m) { mesh = m; }
 
-	void			SetShader(Shader*s) { shader = s; }
 	Shader*			GetShader() { return shader; }
+	void			SetShader(Shader* s) { shader = s; }
+
+	// Addition by Mark Kostadinov <m.kostadinov1@newcastle.ac.uk>
+	Light*			GetLight() const { return light; }
+	void			SetLight(Light* l) { light = l; }
 
 	bool	IsAwake() { return awake; }
 	void	Wake() { awake = true; }
@@ -76,6 +80,7 @@ protected:
 	Vector3			modelScale;
 	Mesh*			mesh;
 	Shader*			shader;
+	Light*			light;
 	bool			awake;
 	std::vector<SceneNode*>		children;
 };

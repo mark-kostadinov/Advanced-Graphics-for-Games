@@ -46,10 +46,10 @@ void ResourceManager::LoadShaders()
 	GetRenderer()->SetSnowCollisionShader(new Shader(SHADERDIR"SnowCollisionVertex.glsl", SHADERDIR"SnowCollisionFragment.glsl"));
 	GetRenderer()->SetRainCollisionShader(new Shader(SHADERDIR"RainCollisionVertex.glsl", SHADERDIR"RainCollisionFragment.glsl"));
 	GetRenderer()->SetPostProcessingShader(new Shader(SHADERDIR"PostProcessingVertex.glsl", SHADERDIR"PostProcessingFragment.glsl"));
-	//GetRenderer()->SetFogShader(new Shader(SHADERDIR"FogVertex.glsl", SHADERDIR"FogFragment.glsl"));
 	GetRenderer()->SetFontShader(new Shader(SHADERDIR"TexturedVertex.glsl", SHADERDIR"TexturedFragment.glsl"));
 	// SECOND_SCENE
 	GetRenderer()->SetShadowShader(new Shader(SHADERDIR"ShadowVertex.glsl", SHADERDIR"ShadowFragment.glsl"));
+	GetRenderer()->SetOmniShadowShader(new Shader(SHADERDIR"OmniShadowVertex.glsl", SHADERDIR"OmniShadowFragment.glsl", "", "", SHADERDIR"OmniShadowGeometry.glsl"));
 	GetRenderer()->SetReflectionShader(new Shader(SHADERDIR"ReflectionVertex.glsl", SHADERDIR"ReflectionFragment.glsl"));
 	GetRenderer()->SetReflectiveTextureShader(new Shader(SHADERDIR"ReflectiveTextureVertex.glsl", SHADERDIR"ReflectiveTextureFragment.glsl"));
 
@@ -59,7 +59,8 @@ void ResourceManager::LoadShaders()
 		!GetRenderer()->GetRainParticleShader()->LinkProgram() || !GetRenderer()->GetSnowCollisionShader()->LinkProgram() || 
 		!GetRenderer()->GetRainCollisionShader()->LinkProgram() || !GetRenderer()->GetPostProcessingShader()->LinkProgram() || 
 		!GetRenderer()->GetFontShader()->LinkProgram() || !GetRenderer()->GetShadowShader()->LinkProgram() || 
-		!GetRenderer()->GetReflectionShader()->LinkProgram() || !GetRenderer()->GetReflectiveTextureShader()->LinkProgram()) // !GetRenderer()->GetFogShader()->LinkProgram()
+		!GetRenderer()->GetOmniShadowShader()->LinkProgram() || !GetRenderer()->GetReflectionShader()->LinkProgram() || 
+		!GetRenderer()->GetReflectiveTextureShader()->LinkProgram())
 	{
 		PrintToConsole("Could not link one of the shaders!", 1);
 		return;
@@ -91,14 +92,18 @@ void ResourceManager::LoadTextures()
 		TEXTUREDIR"CloudyLightRays/Left.PNG", TEXTUREDIR"CloudyLightRays/Right.PNG", TEXTUREDIR"CloudyLightRays/Up.PNG",
 		TEXTUREDIR"CloudyLightRays/Down.PNG", TEXTUREDIR"CloudyLightRays/Front.PNG", TEXTUREDIR"CloudyLightRays/Back.PNG",
 		SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0));
-	GetRenderer()->SetFont(new Font(SOIL_load_OGL_texture(
-		TEXTUREDIR"tahoma.TGA", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT), 16, 16));
+	GetRenderer()->SetFont(new Font(SOIL_load_OGL_texture(TEXTUREDIR"tahoma.TGA", 
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT), 16, 16));
 
 	// SECOND_SCENE
 	GetRenderer()->SetCubeMapSpaceTexture(SOIL_load_OGL_cubemap(
 		TEXTUREDIR"Space/Right.PNG", TEXTUREDIR"Space/Left.PNG", TEXTUREDIR"Space/Top.PNG",
 		TEXTUREDIR"Space/Bottom.PNG", TEXTUREDIR"Space/Front.PNG", TEXTUREDIR"Space/Back.PNG",
 		SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0));
+	GetRenderer()->SetEarthTexture(SOIL_load_OGL_texture(TEXTUREDIR"earth.JPG",
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	GetRenderer()->SetSunTexture(SOIL_load_OGL_texture(TEXTUREDIR"sun.JPG",
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 
 	CheckTextureLoading();
 }
@@ -147,6 +152,20 @@ void ResourceManager::CheckTextureLoading()
 		return;
 	}
 	GetRenderer()->SetTextureRepeating(GetRenderer()->GetCubeMapSpaceTexture(), true);
+
+	if (!GetRenderer()->GetEarthTexture())
+	{
+		PrintToConsole("Could not load the Earth texture!", 1);
+		return;
+	}
+	GetRenderer()->SetTextureRepeating(GetRenderer()->GetEarthTexture(), true);
+
+	if (!GetRenderer()->GetSunTexture())
+	{
+		PrintToConsole("Could not load the Sun texture!", 1);
+		return;
+	}
+	GetRenderer()->SetTextureRepeating(GetRenderer()->GetSunTexture(), true);
 }
 
 void ResourceManager::SetMeshes()
@@ -192,8 +211,7 @@ void ResourceManager::SetMeshes()
 	// SECOND_SCENE
 	GetRenderer()->SetTexturedSphereMesh(new OBJMesh());
 	GetRenderer()->GetTexturedSphereMesh()->LoadOBJMesh(MESHDIR"texturedSphere.obj");
-	GetRenderer()->GetTexturedSphereMesh()->SetTexture(SOIL_load_OGL_texture(TEXTUREDIR"earth.JPG",
-		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS)); /// TODO: add a GLuint
+	GetRenderer()->GetTexturedSphereMesh()->SetTexture(GetRenderer()->GetEarthTexture());
 	if (!GetRenderer()->GetTexturedSphereMesh()->GetTexture())
 	{
 		PrintToConsole("Could not load the textured sphere texture!", 1);
@@ -203,6 +221,16 @@ void ResourceManager::SetMeshes()
 
 	GetRenderer()->SetReflectiveMesh(new OBJMesh());
 	GetRenderer()->GetReflectiveMesh()->LoadOBJMesh(MESHDIR"reflectiveSphere.obj");
+
+	GetRenderer()->SetSunMesh(new OBJMesh());
+	GetRenderer()->GetSunMesh()->LoadOBJMesh(MESHDIR"texturedSphere.obj");
+	GetRenderer()->GetSunMesh()->SetTexture(GetRenderer()->GetSunTexture());
+	if (!GetRenderer()->GetSunMesh()->GetTexture())
+	{
+		PrintToConsole("Could not load the Sun texture!", 1);
+		return;
+	}
+	EnableAnisotropicFiltering(GetRenderer()->GetSunMesh()->GetTexture(), largestSupportedAnisotropyLevel);
 }
 
 void ResourceManager::SetSceneNodes()
@@ -271,6 +299,12 @@ void ResourceManager::SetSceneNodes()
 	GetRenderer()->GetReflectiveSphereNode()->SetModelScale(Vector3(500.0f, 1250.0f, 500.0f));
 	GetRenderer()->GetReflectiveSphereNode()->SetBoundingRadius(10000.0f);
 	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetReflectiveSphereNode());
+
+	GetRenderer()->SetSunNode(new SceneNode(GetRenderer()->GetSunMesh(), defaultTransparentColourVector, GetRenderer()->GetSceneObjectShader(), GetRenderer()->GetMovingLight()));
+	GetRenderer()->GetSunNode()->SetTransform(Matrix4::Translation(SUN_STARTING_POS) * defaultRotationMatrix);
+	GetRenderer()->GetSunNode()->SetModelScale(Vector3(20.0f, 20.0f, 20.0f));
+	GetRenderer()->GetSunNode()->SetBoundingRadius(10000.0f);
+	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetSunNode());
 
 	// FINAL_SCENE
 }

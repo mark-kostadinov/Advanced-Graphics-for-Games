@@ -1,0 +1,9 @@
+- Pressing the Left and Right arrow keys cycle forward and backward through the scenes.
+- Pressing the Pause key toggles whether the program will automatically cycle through the scenes.
+- Pressing [1] will reset the weather in the first scene.
+- Pressing [2] will toggle snow in the first scene.
+- Pressing [3] will toggle rain in the first scene.
+- Pressing [4] will toggle the shadow debug mode in every scene.
+- Pressing [5] will toggle the moving light mode in every scene.
+
+The commands available for each scene are listed in the top left corner of the screen, along with the framerate and GPU memory usage.

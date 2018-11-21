@@ -35,8 +35,8 @@ void main(void)
 
 	for (int i = 0; i < 5; i++) 
 	{
-		vec4 tmp = texture2D(diffuseTex, IN.texCoord.xy + values[i]);
-		FragColour += tmp * weights[i];
+		vec4 diffuse = texture(diffuseTex, IN.texCoord.xy + values[i]);
+		FragColour += diffuse * weights[i];
 	}
 	
 	// Alpha fading

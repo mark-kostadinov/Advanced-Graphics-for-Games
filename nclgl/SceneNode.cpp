@@ -1,11 +1,12 @@
 #include "SceneNode.h"
 
-SceneNode::SceneNode(Mesh*mesh, Vector4 colour, Shader* shader)
+SceneNode::SceneNode(Mesh*mesh, Vector4 colour, Shader* shader, Light* light)
 {
 	awake = true;
 	this->mesh = mesh;
 	this->colour = colour;
 	this->shader = shader;
+	this->light = light;
 	parent = NULL;
 	boundingRadius = 100.0f;
 	distanceFromCamera = 0.0f;

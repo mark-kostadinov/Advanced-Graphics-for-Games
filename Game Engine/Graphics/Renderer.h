@@ -60,6 +60,8 @@ public:
 	void		SetTexturedSphereNode(SceneNode* n)		{ texturedSphereNode = n; }
 	SceneNode*	GetReflectiveSphereNode() const			{ return reflectiveSphereNode; }
 	void		SetReflectiveSphereNode(SceneNode* n)	{ reflectiveSphereNode = n; }
+	SceneNode*	GetSunNode() const						{ return sunNode; }
+	void		SetSunNode(SceneNode* n)				{ sunNode = n; }
 
 	HeightMap*	GetHeightMap() const					{ return heightMap; }
 	void		SetHeightMap(HeightMap* h)				{ heightMap = h; }
@@ -84,6 +86,8 @@ public:
 	void		SetTexturedSphereMesh(OBJMesh* m)		{ texturedSphereMesh = m; }
 	OBJMesh*	GetReflectiveMesh() const				{ return reflectiveSphereMesh; }
 	void		SetReflectiveMesh(OBJMesh* m)			{ reflectiveSphereMesh = m; }
+	OBJMesh*	GetSunMesh() const						{ return sunMesh; }
+	void		SetSunMesh(OBJMesh* m)					{ sunMesh = m; }
 	
 	// FIRST_SCENE
 	GLuint		GetCubeMapSunnyTexture() const			{ return cubeMapSunnyTexture; }
@@ -101,6 +105,12 @@ public:
 	void		SetCubeMapSpaceTexture(GLuint t)		{ cubeMapSpaceTexture = t; }
 	GLuint		GetReflectiveColourTexture() const		{ return reflectiveColourTexture; }
 	void		SetReflectiveColourTexture(GLuint t)	{ reflectiveColourTexture = t; }
+	GLuint		GetEarthTexture() const					{ return earthTexture; }
+	void		SetEarthTexture(GLuint t)				{ earthTexture = t; }
+	GLuint		GetOmniDirShadowCubeMapTexture() const	{ return omniShadowCubeMapTexture; }
+	void		SetOmniDirShadowCubeMapTexture(GLuint t) { omniShadowCubeMapTexture = t; }
+	GLuint		GetSunTexture() const					{ return sunTexture; }
+	void		SetSunTexture(GLuint t)					{ sunTexture = t; }
 
 	// FIRST_SCENE
 	Shader*		GetDefaultShader() const				{ return defaultShader; }
@@ -123,13 +133,13 @@ public:
 	void		SetRainCollisionShader(Shader* s)		{ rainCollisionShader = s; }
 	Shader*		GetPostProcessingShader() const			{ return postProcessingShader; }
 	void		SetPostProcessingShader(Shader* s)		{ postProcessingShader = s; }
-	//Shader*	GetFogShader() const					{ return fogShader; }
-	//void		SetFogShader(Shader* s)					{ fogShader = s; }
 	Shader*		GetFontShader() const					{ return fontShader; }
 	void		SetFontShader(Shader* s)				{ fontShader = s; }
 	// SECOND_SCENE
 	Shader*		GetShadowShader() const					{ return shadowShader; }
 	void		SetShadowShader(Shader* s)				{ shadowShader = s; }
+	Shader*		GetOmniShadowShader() const				{ return omniShadowShader; }
+	void		SetOmniShadowShader(Shader* s)			{ omniShadowShader = s; }
 	Shader*		GetReflectionShader() const				{ return reflectionShader; }
 	void		SetReflectionShader(Shader* s)			{ reflectionShader = s; }
 	Shader*		GetReflectiveTextureShader() const		{ return reflectiveTextureShader; }
@@ -150,6 +160,9 @@ public:
 	// Buffer for the data that comes from the performance timer
 	string textBuffer;
 
+	bool isFirstMiniScene = true;
+	bool isSecondMiniScene = false;
+
 protected:
 	void	BuildNodeLists(SceneNode* from);
 	void	SortNodeLists();
@@ -165,6 +178,7 @@ protected:
 	void	DrawShadowScene();
 	void	ApplyPostProcessEffects();
 	void	ResetPPFX();
+	void	DrawOmniDirShadowScene();
 
 	void	SetShaderParticleSize(float f);
 	void	DrawSkybox();
@@ -172,10 +186,10 @@ protected:
 	void	GenerateDepthTextureFBO(GLuint &texture);
 	void	GenerateColourTextureFBO(GLuint &texture);
 	void	AttachTexturesFBO(GLuint &fbo, GLuint &colourTexture, GLuint &depthTexture);
+	void	AttachDepthTextureFBO(GLuint &fbo, GLuint &depthTexture);
 	void	DrawParticleCollisionFBO();
 	void	DrawReflectiveTextureFBO();
 
-	void	DrawFog();
 	void	DrawPostProcess();
 	void	RenderWeather();
 	void	UpdateWeather();
@@ -189,8 +203,8 @@ protected:
 	void	DeleteShaders();
 	void	DeleteTextures();
 
-	void	UpdateLight(Light* l);
-	void	MoveLight(Light* l, float delta);
+	void	UpdateLights();
+	void	UpdateMovingLight(Light* l, float delta, bool orbit = NULL);
 	void	UpdatePlanets();
 
 	void	RenderText(const string &text);
@@ -218,6 +232,7 @@ protected:
 	// SECOND_SCENE
 	SceneNode*			texturedSphereNode;
 	SceneNode*			reflectiveSphereNode;
+	SceneNode*			sunNode;
 
 	// FIRST_SCENE
 	Font*			dataFont;
@@ -233,6 +248,7 @@ protected:
 	// SECOND_SCENE
 	OBJMesh*		texturedSphereMesh;
 	OBJMesh*		reflectiveSphereMesh;
+	OBJMesh*		sunMesh;
 
 	// FIRST_SCENE
 	GLuint		cubeMapSunnyTexture;
@@ -241,6 +257,8 @@ protected:
 	GLuint		heightMapBumpTexture;
 	// SECOND_SCENE
 	GLuint		cubeMapSpaceTexture;
+	GLuint		earthTexture;
+	GLuint		sunTexture;
 
 	// FIRST_SCENE
 	GLuint		snowCollisionFBO;
@@ -258,6 +276,8 @@ protected:
 	// SECOND_SCENE
 	GLuint		shadowFBO;
 	GLuint		shadowTexture;
+	GLuint		omniShadowFBO;
+	GLuint		omniShadowCubeMapTexture;
 	GLuint		reflectiveTextureFBO;
 	GLuint		reflectiveColourTexture;
 
@@ -272,10 +292,10 @@ protected:
 	Shader*		snowCollisionShader;
 	Shader*		rainCollisionShader;
 	Shader*		postProcessingShader;
-	//Shader*		fogShader;
 	Shader*		fontShader;
 	// SECOND_SCENE
 	Shader*		shadowShader;
+	Shader*		omniShadowShader;
 	Shader*		reflectionShader;
 	Shader*		reflectiveTextureShader;
 
@@ -290,6 +310,8 @@ protected:
 	float planetRotationAngle = 0.1f;
 	bool fboInUse = false;
 	bool castShadows = false;
+	bool castOmniShadows = false;
+	Matrix4 shadowMatrices[6];
 
 	bool shadowDebuggingMode = false;
 	bool movingLightMode = false;
