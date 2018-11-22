@@ -50,8 +50,8 @@ void ResourceManager::LoadShaders()
 	// SECOND_SCENE
 	GetRenderer()->SetShadowShader(new Shader(SHADERDIR"ShadowVertex.glsl", SHADERDIR"ShadowFragment.glsl"));
 	GetRenderer()->SetOmniShadowShader(new Shader(SHADERDIR"OmniShadowVertex.glsl", SHADERDIR"OmniShadowFragment.glsl", "", "", SHADERDIR"OmniShadowGeometry.glsl"));
+	GetRenderer()->SetSceneObjectOmniShader(new Shader(SHADERDIR"SceneObjectOmniVertex.glsl", SHADERDIR"SceneObjectOmniFragment.glsl"));
 	GetRenderer()->SetReflectionShader(new Shader(SHADERDIR"ReflectionVertex.glsl", SHADERDIR"ReflectionFragment.glsl"));
-	GetRenderer()->SetReflectiveTextureShader(new Shader(SHADERDIR"ReflectiveTextureVertex.glsl", SHADERDIR"ReflectiveTextureFragment.glsl"));
 
 	if (!GetRenderer()->GetDefaultShader()->LinkProgram() || !GetRenderer()->GetSceneNodeShader()->LinkProgram() ||
 		!GetRenderer()->GetSceneObjectShader()->LinkProgram() || !GetRenderer()->GetSkyboxShader()->LinkProgram() || 
@@ -59,8 +59,8 @@ void ResourceManager::LoadShaders()
 		!GetRenderer()->GetRainParticleShader()->LinkProgram() || !GetRenderer()->GetSnowCollisionShader()->LinkProgram() || 
 		!GetRenderer()->GetRainCollisionShader()->LinkProgram() || !GetRenderer()->GetPostProcessingShader()->LinkProgram() || 
 		!GetRenderer()->GetFontShader()->LinkProgram() || !GetRenderer()->GetShadowShader()->LinkProgram() || 
-		!GetRenderer()->GetOmniShadowShader()->LinkProgram() || !GetRenderer()->GetReflectionShader()->LinkProgram() || 
-		!GetRenderer()->GetReflectiveTextureShader()->LinkProgram())
+		!GetRenderer()->GetOmniShadowShader()->LinkProgram() || !GetRenderer()->GetSceneObjectOmniShader()->LinkProgram() ||
+		!GetRenderer()->GetReflectionShader()->LinkProgram())
 	{
 		PrintToConsole("Could not link one of the shaders!", 1);
 		return;
@@ -103,6 +103,8 @@ void ResourceManager::LoadTextures()
 	GetRenderer()->SetEarthTexture(SOIL_load_OGL_texture(TEXTUREDIR"earth.JPG",
 		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	GetRenderer()->SetSunTexture(SOIL_load_OGL_texture(TEXTUREDIR"sun.JPG",
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	GetRenderer()->SetMoonTexture(SOIL_load_OGL_texture(TEXTUREDIR"moon.PNG",
 		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 
 	CheckTextureLoading();
@@ -166,6 +168,13 @@ void ResourceManager::CheckTextureLoading()
 		return;
 	}
 	GetRenderer()->SetTextureRepeating(GetRenderer()->GetSunTexture(), true);
+
+	if (!GetRenderer()->GetMoonTexture())
+	{
+		PrintToConsole("Could not load the Moon texture!", 1);
+		return;
+	}
+	GetRenderer()->SetTextureRepeating(GetRenderer()->GetMoonTexture(), true);
 }
 
 void ResourceManager::SetMeshes()
@@ -209,15 +218,15 @@ void ResourceManager::SetMeshes()
 	EnableAnisotropicFiltering(GetRenderer()->GetRockMesh()->GetTexture(), largestSupportedAnisotropyLevel);
 
 	// SECOND_SCENE
-	GetRenderer()->SetTexturedSphereMesh(new OBJMesh());
-	GetRenderer()->GetTexturedSphereMesh()->LoadOBJMesh(MESHDIR"texturedSphere.obj");
-	GetRenderer()->GetTexturedSphereMesh()->SetTexture(GetRenderer()->GetEarthTexture());
-	if (!GetRenderer()->GetTexturedSphereMesh()->GetTexture())
+	GetRenderer()->SetEarthMesh(new OBJMesh());
+	GetRenderer()->GetEarthMesh()->LoadOBJMesh(MESHDIR"texturedSphere.obj");
+	GetRenderer()->GetEarthMesh()->SetTexture(GetRenderer()->GetEarthTexture());
+	if (!GetRenderer()->GetEarthMesh()->GetTexture())
 	{
 		PrintToConsole("Could not load the textured sphere texture!", 1);
 		return;
 	}
-	EnableAnisotropicFiltering(GetRenderer()->GetTexturedSphereMesh()->GetTexture(), largestSupportedAnisotropyLevel);
+	EnableAnisotropicFiltering(GetRenderer()->GetEarthMesh()->GetTexture(), largestSupportedAnisotropyLevel);
 
 	GetRenderer()->SetReflectiveMesh(new OBJMesh());
 	GetRenderer()->GetReflectiveMesh()->LoadOBJMesh(MESHDIR"reflectiveSphere.obj");
@@ -231,6 +240,16 @@ void ResourceManager::SetMeshes()
 		return;
 	}
 	EnableAnisotropicFiltering(GetRenderer()->GetSunMesh()->GetTexture(), largestSupportedAnisotropyLevel);
+
+	GetRenderer()->SetMoonMesh(new OBJMesh());
+	GetRenderer()->GetMoonMesh()->LoadOBJMesh(MESHDIR"texturedSphere.obj");
+	GetRenderer()->GetMoonMesh()->SetTexture(GetRenderer()->GetMoonTexture());
+	if (!GetRenderer()->GetMoonMesh()->GetTexture())
+	{
+		PrintToConsole("Could not load the Moon texture!", 1);
+		return;
+	}
+	EnableAnisotropicFiltering(GetRenderer()->GetMoonMesh()->GetTexture(), largestSupportedAnisotropyLevel);
 }
 
 void ResourceManager::SetSceneNodes()
@@ -288,11 +307,11 @@ void ResourceManager::SetSceneNodes()
 	}
 
 	// SECOND_SCENE
-	GetRenderer()->SetTexturedSphereNode(new SceneNode(GetRenderer()->GetTexturedSphereMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader()));
-	GetRenderer()->GetTexturedSphereNode()->SetTransform(Matrix4::Translation(Vector3(0.0f, 1000.0f, 0.0f)) * defaultRotationMatrix);
-	GetRenderer()->GetTexturedSphereNode()->SetModelScale(Vector3(100.0f, 100.0f, 100.0f));
-	GetRenderer()->GetTexturedSphereNode()->SetBoundingRadius(10000.0f);
-	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetTexturedSphereNode());
+	GetRenderer()->SetEarthNode(new SceneNode(GetRenderer()->GetEarthMesh(), defaultOpaqueColourVector, GetRenderer()->GetSceneObjectShader()));
+	GetRenderer()->GetEarthNode()->SetTransform(Matrix4::Translation(Vector3(0.0f, 1000.0f, 0.0f)) * defaultRotationMatrix);
+	GetRenderer()->GetEarthNode()->SetModelScale(Vector3(100.0f, 100.0f, 100.0f));
+	GetRenderer()->GetEarthNode()->SetBoundingRadius(10000.0f);
+	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetEarthNode());
 
 	GetRenderer()->SetReflectiveSphereNode(new SceneNode(GetRenderer()->GetReflectiveMesh(), defaultOpaqueColourVector, GetRenderer()->GetReflectionShader()));
 	GetRenderer()->GetReflectiveSphereNode()->SetTransform(Matrix4::Translation(Vector3(10000.0f, 1250.0f, 10000.0f)) * defaultRotationMatrix);
@@ -305,6 +324,12 @@ void ResourceManager::SetSceneNodes()
 	GetRenderer()->GetSunNode()->SetModelScale(Vector3(20.0f, 20.0f, 20.0f));
 	GetRenderer()->GetSunNode()->SetBoundingRadius(10000.0f);
 	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetSunNode());
+
+	GetRenderer()->SetMoonNode(new SceneNode(GetRenderer()->GetMoonMesh(), defaultTransparentColourVector, GetRenderer()->GetSceneObjectShader(), GetRenderer()->GetMovingLight()));
+	GetRenderer()->GetMoonNode()->SetTransform(Matrix4::Translation(MOON_STARTING_POS) * defaultRotationMatrix);
+	GetRenderer()->GetMoonNode()->SetModelScale(Vector3(40.0f, 40.0f, 40.0f));
+	GetRenderer()->GetMoonNode()->SetBoundingRadius(10000.0f);
+	GetRenderer()->GetRootNode(SECOND_SCENE)->AddChild(GetRenderer()->GetMoonNode());
 
 	// FINAL_SCENE
 }

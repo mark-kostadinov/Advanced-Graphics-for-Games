@@ -18,18 +18,18 @@
 
 // Window global variables
 constexpr const char* programTitle = "CSC8502 Coursework";
-constexpr int windowSizeX = 1200;
-constexpr int windowSizeY = 800;
-constexpr bool fullScreen = false;
+constexpr int windowSizeX = 1920;
+constexpr int windowSizeY = 1200;
+constexpr bool fullScreen = true;
 
 // Some GL_CLEAR colour definitions
 #define GL_BLACK					0.0f, 0.0f, 0.0f, 1.0f
 #define GL_GRAY						0.3f, 0.3f, 0.3f, 1.0f
 
 // Time definitions
-constexpr float sceneCycleTimeMS = 10000.0f; // i.e. 30 sec
+constexpr float sceneCycleTimeMS = 40000.0f; // i.e. 40 sec
 constexpr float sceneTransitionTime = 5000.0f; // i.e. 5 sec
-constexpr float sceneTransitionRate = 1.f / sceneTransitionTime;
+constexpr float sceneTransitionRate = 1.0f / sceneTransitionTime;
 
 // Particle emitter definitions
 #define PARTICLE_EMITTER_POSITION	Vector3(0.0f, 7500.0f, 0.0f)
@@ -42,18 +42,21 @@ constexpr int scenesCount	= 3;
 #define ROCK_MTL_FILE_NAME			"Rock.mtl"
 constexpr int numberOfTrees = 10;
 constexpr int numberOfRocks = 5;
+#define SUN_STARTING_POS					Vector3(0.0f, 1500.0f, 0.0f)
+#define MOON_STARTING_POS					Vector3(-4000.0f, 2000.0f, -4000.0f)
 
 // Light & Camera definitions
 constexpr float lightMovementDelta = 10.0f;
 #define FIRST_SCENE_MAIN_LIGHT_POS			Vector3(-4000.0f, 10000.0f, -4000.0f)
 #define SECOND_SCENE_MAIN_LIGHT_POS			Vector3(-30000.0f, 2000.0f, -10000.0f)
-#define FIRST_MINI_SCENE_MAIN_LIGHT_POS		Vector3(0.0f, 30000.0f, 0.0f) /// TODO
-#define SECOND_MINI_SCENE_MAIN_LIGHT_POS	Vector3(10000.0f, 10000.0f, 0.0f) /// TODO
 #define FIRST_SCENE_MOVING_LIGHT_Y			25000.0f
 #define SECOND_SCENE_MOVING_LIGHT_Y			3000.0f
-#define FIRST_SCENE_CAM_POS					Vector3(5000.0f, 7000.0f, 22000.0f)
-#define SECOND_SCENE_CAM_POS				Vector3(7000.0f, 2500.0f, -12000.0f)
-#define SUN_STARTING_POS					Vector3(0.0f, 1500.0f, 0.0f)
+#define FIRST_SCENE_CAM_POS					Vector3(7000.0f, 4500.0f, 22000.0f)
+#define SECOND_SCENE_CAM_POS				Vector3(8500.0f, 2500.0f, -13000.0f)
+#define FIRST_MINI_SCENE_CAM_POS			Vector3(-10000.0f, 10000.0f, 10000.0f)
+#define SECOND_MINI_SCENE_CAM_POS			Vector3(10000.0f, 8000.0f, -10000.0f)
+
+//#define CINEMATIC_CAM_MOVEMENT
 
 // Printing out function
 template <typename T>

@@ -17,7 +17,7 @@ Renderer::Renderer(Window &parent, SceneManager * sceneManager) : OGLRenderer(pa
 
 	// Generate a moving light for the rain scene
 	Vector2 randomPosition = GenerateRandomPosition((int)(RAW_HEIGHT * HEIGHTMAP_X), (int)(RAW_WIDTH * HEIGHTMAP_Z));
-	SetMovingLight(new Light(Vector3(randomPosition.x, 25000.0f, randomPosition.y), Vector4(1, 1, 1, 1), RAW_HEIGHT * HEIGHTMAP_X * 5.0f));
+	SetMovingLight(new Light(Vector3(randomPosition.x, FIRST_SCENE_MOVING_LIGHT_Y, randomPosition.y), Vector4(1, 1, 1, 1), RAW_HEIGHT * HEIGHTMAP_X * 5.0f));
 
 	// Create the Frame Buffer Object
 	GenerateFBOs();
@@ -43,6 +43,9 @@ void Renderer::UpdateScene(float msec)
 
 	camera->UpdateCamera();
 	viewMatrix = camera->BuildViewMatrix();
+#ifdef CINEMATIC_CAM_MOVEMENT
+	viewMatrix = Matrix4::BuildViewMatrix(camera->GetPosition(), Vector3(0, 0, 0));
+#endif // CINEMATIC_CAM_MOVEMENT
 	frameFrustum.FromMatrix(projMatrix*viewMatrix);
 
 	SwitchScenesUpdating();
@@ -57,8 +60,7 @@ void Renderer::RenderScene()
 	if (GetSceneManager()->IsSceneCyclingAllowed() && 
 		GetSceneManager()->GetSceneTimer()->GetMS() >= sceneCycleTimeMS - sceneTransitionTime)
 	{
-		DrawShadowScene();
-		//DrawOmniDirShadowScene();
+		DrawShadows();
 		glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		fboInUse = true;
@@ -75,8 +77,7 @@ void Renderer::RenderScene()
 	}
 	else
 	{
-		DrawShadowScene();
-		//DrawOmniDirShadowScene();
+		DrawShadows();
 		DrawScene();
 		ResetPPFX();
 	}
@@ -109,7 +110,8 @@ void Renderer::DrawShadowScene()
 	else
 		currentLight = *mainLight;
 
-	Matrix4 tempMatrix = projMatrix;
+	Matrix4 tempViewMatrix = viewMatrix;
+	Matrix4 tempProjMatrix = projMatrix;
 	projMatrix = Matrix4::Perspective(1.0f, 30000.0f, 1, 90.0f);
 
 	if (IsMovingLightModeOn())
@@ -122,12 +124,12 @@ void Renderer::DrawShadowScene()
 	fboInUse = false;
 	ClearNodeLists();
 
-	projMatrix = tempMatrix;
+	projMatrix = tempProjMatrix;
+	viewMatrix = tempViewMatrix;
 
 	castShadows = false;
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	glViewport(0, 0, width, height);
-	viewMatrix = camera->BuildViewMatrix();
 	glCullFace(GL_BACK);
 	glUseProgram(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -173,12 +175,14 @@ void Renderer::DrawOmniDirShadowScene()
 	Vector3 lightSourcePosition = currentLight.GetPosition();
 	Vector3 cameraDirections[6] = { Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 1, 0),
 									Vector3(0, -1, 0), Vector3(0, 0, 1), Vector3(0, 0, -1) };
+	Vector3 upDirections[6] = { Vector3(0, -1, 0),Vector3(0, -1, 0), Vector3(0, 0, 1),
+								Vector3(0, 0, -1), Vector3(0, -1, 0), Vector3(0, -1, 0) };
 
 	for (int i = 0; i < 6; i++)
 	{
-		// Generate the 6 viewMatrices from the camera's position
-		viewMatrix = Matrix4::BuildViewMatrix(lightSourcePosition, cameraDirections[i]);
-		shadowMatrices[i] = biasMatrix * (projMatrix * viewMatrix);
+		// Generate the 6 viewProjection matrices from the camera's position
+		viewMatrix = Matrix4::BuildViewMatrix(lightSourcePosition, lightSourcePosition + cameraDirections[i], upDirections[i]);
+		lightMatrices[i] = (projMatrix * viewMatrix);
 	}
 	fboInUse = true;
 	DrawScene();
@@ -191,10 +195,17 @@ void Renderer::DrawOmniDirShadowScene()
 	castOmniShadows = false;
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	glViewport(0, 0, width, height);
-	viewMatrix = camera->BuildViewMatrix();
 	glCullFace(GL_BACK);
 	glUseProgram(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::DrawShadows()
+{
+	if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE || (GetSceneManager()->GetCurrentScene() == SECOND_SCENE && !movingLightMode))
+		DrawShadowScene();
+	else if (GetSceneManager()->GetCurrentScene() == SECOND_SCENE && movingLightMode)
+		DrawOmniDirShadowScene();
 }
 
 void Renderer::GenerateFBOs()
@@ -232,13 +243,11 @@ void Renderer::GenerateFBOs()
 	GenerateColourTextureFBO(postProcessingColourTexture);
 	for (int i = 0; i < 2; ++i)
 		GenerateColourTextureFBO(bufferColourTexture[i]);
-	GenerateColourTextureFBO(reflectiveColourTexture);
 
 	glGenFramebuffers(1, &snowCollisionFBO);
 	glGenFramebuffers(1, &rainCollisionFBO);
 	glGenFramebuffers(1, &postProcessingFBO);
 	glGenFramebuffers(1, &bufferFBO);
-	glGenFramebuffers(1, &reflectiveTextureFBO); /// TODO
 
 	glGenFramebuffers(1, &omniShadowFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, omniShadowFBO);
@@ -286,11 +295,9 @@ void Renderer::AttachTexturesFBO(GLuint & fbo, GLuint & colourTexture, GLuint & 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture, 0);
-	// We can check FBO attachment success using this command
+
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || !depthTexture || !colourTexture)
-	{
 		return;
-	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -344,43 +351,6 @@ void Renderer::DrawParticleCollisionFBO()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-}
-
-/// TODO + create shaders in the folder
-void Renderer::DrawReflectiveTextureFBO()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, reflectiveTextureFBO);
-	glViewport(0, 0, width, height);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
-
-	SetCurrentShader(reflectiveTextureShader);
-	modelMatrix.ToIdentity();
-	SwitchToOrtho();
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, reflectiveColourTexture);
-
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "cubeTex"), 0);
-	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(), "cameraPos"), 1, (float *)&camera->GetPosition());
-	UpdateShaderMatrices();
-
-	versatileMesh->SetTexture(reflectiveColourTexture);
-	versatileMesh->Draw();
-
-	ResetMVP();
-
-	glUseProgram(0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-
-	/// Have an array of six texture2Ds and loop through each one to render the view from each side of the reflective sphere in Ortho;
-	/// Load these 6 textures to a cubeMap to be used by the reflective sphere below.
-
-// https://learnopengl.com/Advanced-OpenGL/Cubemaps
 }
 
 void Renderer::DrawPostProcess()
@@ -605,12 +575,14 @@ void Renderer::DeleteObjects()
 	delete rockMesh;
 	rockMesh = NULL;
 	// SECOND_SCENE
-	delete texturedSphereMesh;
-	texturedSphereMesh = NULL;
+	delete earthMesh;
+	earthMesh = NULL;
 	delete reflectiveSphereMesh;
 	reflectiveSphereMesh = NULL;
 	delete sunMesh;
 	sunMesh = NULL;
+	delete moonMesh;
+	moonMesh = NULL;
 
 	for (int i = 0; i < scenesCount; i++)
 	{
@@ -676,10 +648,10 @@ void Renderer::DeleteShaders()
 	shadowShader = NULL;
 	delete omniShadowShader;
 	omniShadowShader = NULL;
+	delete sceneObjectOmniShader;
+	sceneObjectOmniShader = NULL;
 	delete reflectionShader;
 	reflectionShader = NULL;
-	delete reflectiveTextureShader;
-	reflectiveTextureShader = NULL;
 
 	currentShader = 0;
 }
@@ -706,11 +678,10 @@ void Renderer::DeleteTextures()
 	// SECOND_SCENE
 	glDeleteTextures(1, &shadowTexture);
 	glDeleteTextures(1, &cubeMapSpaceTexture);
-	glDeleteTextures(1, &reflectiveColourTexture);
 	glDeleteTextures(1, &earthTexture);
 	glDeleteTextures(1, &omniShadowCubeMapTexture);
 	glDeleteTextures(1, &sunTexture);
-	glDeleteFramebuffers(1, &reflectiveTextureFBO);
+	glDeleteTextures(1, &moonTexture);
 	glDeleteFramebuffers(1, &shadowFBO);
 	glDeleteFramebuffers(1, &omniShadowFBO);
 }
@@ -765,7 +736,8 @@ void Renderer::UpdateMovingLight(Light * l, float delta, bool orbit)
 
 void Renderer::UpdatePlanets()
 {
-	GetTexturedSphereNode()->SetTransform(Matrix4::Translation(GetTexturedSphereNode()->GetTransform().GetPositionVector()) * Matrix4::Rotation(planetRotationAngle, Vector3(0.0f, 1.0f, 0.0f)));
+	GetEarthNode()->SetTransform(Matrix4::Translation(GetEarthNode()->GetTransform().GetPositionVector()) * Matrix4::Rotation(planetRotationAngle, Vector3(0.0f, 1.0f, 0.0f)));
+	GetMoonNode()->SetTransform(Matrix4::Translation(GetMoonNode()->GetTransform().GetPositionVector()) * Matrix4::Rotation(planetRotationAngle, Vector3(1.0f, 1.0f, 1.0f)));
 
 	float radius = 10000.0f;
 	float x = cos(planetRotationAngle * 0.05f) * radius;
@@ -778,35 +750,42 @@ void Renderer::UpdatePlanets()
 		planetRotationAngle = 0.1f;
 }
 
-/// TODO: Fix LookAt()
 void Renderer::UpdateCameraPosition()
 {
 	// A really hacky way of doing this but it saves a lot of code duplication since 
 	// I'm just showing different parts/effects of the same scene
 	if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE && isFirstMiniScene)
 	{
-		camera->SetPosition(FIRST_MINI_SCENE_MAIN_LIGHT_POS); /// TODO: Set to a good position for the emitters
+		ResetWeatherConditions();
 		renderSnow = true;
 		isFirstMiniScene = false;
 		isSecondMiniScene = true;
+		camera->SetPosition(FIRST_MINI_SCENE_CAM_POS);
+		camera->SetPitch(-20.0f);
+		camera->SetYaw(275.0f);
 	}
 	else if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE && isSecondMiniScene)
 	{
-		camera->SetPosition(SECOND_MINI_SCENE_MAIN_LIGHT_POS); /// TODO: Set to a good position for the emitters
-		renderSnow = false;
+		ResetWeatherConditions();
 		renderRain = true;
 		isSecondMiniScene = false;
+		camera->SetPosition(SECOND_MINI_SCENE_CAM_POS);
+		camera->SetPitch(-10.0f);
+		camera->SetYaw(-185.0f);
 	}
 	else if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE && !isFirstMiniScene) 
 	{
-		camera->SetPosition(FIRST_SCENE_CAM_POS);
 		isFirstMiniScene = true;
+		camera->SetPosition(FIRST_SCENE_CAM_POS);
+		camera->SetPitch(0.0f);
+		camera->SetYaw(0.0f);
 	}
 	else if (GetSceneManager()->GetCurrentScene() == SECOND_SCENE)
 	{
 		camera->SetPosition(SECOND_SCENE_CAM_POS);
+		camera->SetPitch(-10.0f);
+		camera->SetYaw(-250.0f);
 	}
-	viewMatrix = Matrix4::BuildViewMatrix(camera->GetPosition(), Vector3(0, 0, 0));
 }
 
 void Renderer::RenderText(const string & text)
@@ -911,9 +890,21 @@ void Renderer::DrawNode(SceneNode*n)
 			return;
 
 		if (castShadows)
+		{
 			SetCurrentShader(shadowShader);
-		//else if (castOmniShadows)
-		//	SetCurrentShader(omniShadowShader);
+			// Swap between the two shaders
+			GetEarthNode()->SetShader(GetSceneObjectShader());
+			GetSunNode()->SetShader(GetSceneObjectShader());
+			GetMoonNode()->SetShader(GetSceneObjectShader());
+		}
+		else if (castOmniShadows)
+		{
+			SetCurrentShader(omniShadowShader);
+			// Swap between the two shaders
+			GetEarthNode()->SetShader(GetSceneObjectOmniShader());
+			GetSunNode()->SetShader(GetSceneObjectOmniShader());
+			GetMoonNode()->SetShader(GetSceneObjectOmniShader());
+		}
 		else
 			SetCurrentShader(n->GetShader());
 
@@ -960,43 +951,40 @@ void Renderer::SetUniforms(SceneNode* n)
 	{
 		glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "cubeTex"), 4);
 		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, skyMesh->GetTexture()); /// TODO: Capture the whole scene around the sphere by making a cubeMap
+		glBindTexture(GL_TEXTURE_CUBE_MAP, skyMesh->GetTexture()); /// TODO: Capture the whole scene around the sphere
 	} 
 	// Shadows
-	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == texturedSphereMesh ||
-		n->GetMesh() == reflectiveSphereMesh)
+	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == earthMesh ||
+		n->GetMesh() == reflectiveSphereMesh || n->GetMesh() == sunMesh || n->GetMesh() == moonMesh)
 	{
-		glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "shadowTex"), 6);
-		glActiveTexture(GL_TEXTURE6);
+		glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "shadowTex"), 5);
+		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, shadowTexture);
 
-		if (castOmniShadows)
-		{
-			/// TODO
-		}
+		glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "omniShadowMap"), 6);
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, omniShadowCubeMapTexture);
 	}
 
 	modelMatrix = n->GetWorldTransform() * Matrix4::Scale(n->GetModelScale());
 	UpdateShaderMatrices();
 
 	// Shadows
-	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == texturedSphereMesh ||
-		n->GetMesh() == reflectiveSphereMesh)
+	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == earthMesh ||
+		n->GetMesh() == reflectiveSphereMesh || n->GetMesh() == sunMesh || n->GetMesh() == moonMesh)
 	{
-		//if (castShadows)
-		//{
-			Matrix4 tempMatrix = shadowMatrix * modelMatrix;
-			glUniformMatrix4fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), "shadowMatrix"), 1, false, tempMatrix.values);
-		//}
-		//else if (castOmniShadows) /// TODO
-		//{
-		//	Matrix4 tempMatrices[6];
-		//	for (int i = 0; i < 6; i++)
-		//		tempMatrices[i] = shadowMatrices[i] * modelMatrix;
-		//	glUniformMatrix4fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), "shadowMatrices"), 1, false, 
-		//		tempMatrices->values);
-		//	glUniform1f(glGetUniformLocation(GetCurrentShader()->GetProgram(), "farPlane"), farPlane);
-		//}
+		Matrix4 tempMatrix = shadowMatrix * modelMatrix;
+		glUniformMatrix4fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), "shadowMatrix"), 1, false, tempMatrix.values);
+
+		if (castOmniShadows)
+		{
+			for (int i = 0; i < 6; i++)
+			{
+				string smi = "lightMatrices[" + to_string(i) + "]";
+				glUniformMatrix4fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), smi.c_str()), 1, false, lightMatrices[i].values);
+			}
+		}
+		glUniform1f(glGetUniformLocation(GetCurrentShader()->GetProgram(), "farPlane"), 30000.0f);
 	}
 
 	if (IsShadowDebuggingModeOn())
@@ -1007,7 +995,7 @@ void Renderer::SetUniforms(SceneNode* n)
 
 void Renderer::SetLighting(SceneNode * n)
 {
-	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == texturedSphereMesh || 
+	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == earthMesh || 
 		n->GetMesh() == reflectiveSphereMesh)
 	{
 		if (IsMovingLightModeOn())

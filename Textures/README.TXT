@@ -9,3 +9,6 @@ http://wwwtyro.github.io/space-3d/#animationSpeed=1&fov=80&nebulae=true&pointSta
 4) Rock textures taken from: https://www.cgtrader.com/free-3d-models/plant/other/free-rock-fad9cd6a-caa2-404b-9172-07b13b75c9f3
 
 5) Sun texture taken from: https://cdn3.vectorstock.com/i/1000x1000/93/47/yellow-and-orange-abstract-magic-light-background-vector-1559347.jpg
+
+6) Moon texture taken from:
+https://www.deviantart.com/kingmango/art/Mango-Moon-Resource-2-Source-24875731

@@ -40,9 +40,8 @@ void main(void)
 		mat3 TBN = mat3(IN.tangent, IN.binormal, IN.normal);
 		vec3 normal = normalize(TBN * (texture(bumpTex, IN.texCoord).rgb * 2.0 - 1.0));
 		if (hasBumpTexture == 0) {
-			normal = IN.normal;
+			normal = normalize(IN.normal);
 		}
-		
 		vec3 incident = normalize(lightPos - IN.worldPos);
 		float lambert = max(0.0, dot(incident, normal));
 		

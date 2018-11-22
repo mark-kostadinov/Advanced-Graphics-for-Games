@@ -56,12 +56,14 @@ public:
 	vector<SceneNode*> GetTreeNodesVector() const		{ return treeNodes; }
 	vector<SceneNode*> GetRockNodesVector() const		{ return rockNodes; }
 	// SECOND_SCENE
-	SceneNode*	GetTexturedSphereNode() const			{ return texturedSphereNode; }
-	void		SetTexturedSphereNode(SceneNode* n)		{ texturedSphereNode = n; }
+	SceneNode*	GetEarthNode() const					{ return earthNode; }
+	void		SetEarthNode(SceneNode* n)				{ earthNode = n; }
 	SceneNode*	GetReflectiveSphereNode() const			{ return reflectiveSphereNode; }
 	void		SetReflectiveSphereNode(SceneNode* n)	{ reflectiveSphereNode = n; }
 	SceneNode*	GetSunNode() const						{ return sunNode; }
 	void		SetSunNode(SceneNode* n)				{ sunNode = n; }
+	SceneNode*	GetMoonNode() const						{ return moonNode; }
+	void		SetMoonNode(SceneNode* n)				{ moonNode = n; }
 
 	HeightMap*	GetHeightMap() const					{ return heightMap; }
 	void		SetHeightMap(HeightMap* h)				{ heightMap = h; }
@@ -82,12 +84,14 @@ public:
 	OBJMesh*	GetRockMesh() const						{ return rockMesh; }
 	void		SetRockMesh(OBJMesh* m)					{ rockMesh = m; }
 	// SECOND_SCENE
-	OBJMesh*	GetTexturedSphereMesh() const			{ return texturedSphereMesh; }
-	void		SetTexturedSphereMesh(OBJMesh* m)		{ texturedSphereMesh = m; }
+	OBJMesh*	GetEarthMesh() const					{ return earthMesh; }
+	void		SetEarthMesh(OBJMesh* m)				{ earthMesh = m; }
 	OBJMesh*	GetReflectiveMesh() const				{ return reflectiveSphereMesh; }
 	void		SetReflectiveMesh(OBJMesh* m)			{ reflectiveSphereMesh = m; }
 	OBJMesh*	GetSunMesh() const						{ return sunMesh; }
 	void		SetSunMesh(OBJMesh* m)					{ sunMesh = m; }
+	OBJMesh*	GetMoonMesh() const						{ return moonMesh; }
+	void		SetMoonMesh(OBJMesh* m)					{ moonMesh = m; }
 	
 	// FIRST_SCENE
 	GLuint		GetCubeMapSunnyTexture() const			{ return cubeMapSunnyTexture; }
@@ -103,14 +107,14 @@ public:
 	void		SetShadowTexture(GLuint t)				{ shadowTexture = t; }
 	GLuint		GetCubeMapSpaceTexture() const			{ return cubeMapSpaceTexture; }
 	void		SetCubeMapSpaceTexture(GLuint t)		{ cubeMapSpaceTexture = t; }
-	GLuint		GetReflectiveColourTexture() const		{ return reflectiveColourTexture; }
-	void		SetReflectiveColourTexture(GLuint t)	{ reflectiveColourTexture = t; }
 	GLuint		GetEarthTexture() const					{ return earthTexture; }
 	void		SetEarthTexture(GLuint t)				{ earthTexture = t; }
 	GLuint		GetOmniDirShadowCubeMapTexture() const	{ return omniShadowCubeMapTexture; }
 	void		SetOmniDirShadowCubeMapTexture(GLuint t) { omniShadowCubeMapTexture = t; }
 	GLuint		GetSunTexture() const					{ return sunTexture; }
 	void		SetSunTexture(GLuint t)					{ sunTexture = t; }
+	GLuint		GetMoonTexture() const					{ return moonTexture; }
+	void		SetMoonTexture(GLuint t)				{ moonTexture = t; }
 
 	// FIRST_SCENE
 	Shader*		GetDefaultShader() const				{ return defaultShader; }
@@ -140,10 +144,10 @@ public:
 	void		SetShadowShader(Shader* s)				{ shadowShader = s; }
 	Shader*		GetOmniShadowShader() const				{ return omniShadowShader; }
 	void		SetOmniShadowShader(Shader* s)			{ omniShadowShader = s; }
+	Shader*		GetSceneObjectOmniShader() const		{ return sceneObjectOmniShader; }
+	void		SetSceneObjectOmniShader(Shader* s)		{ sceneObjectOmniShader = s; }
 	Shader*		GetReflectionShader() const				{ return reflectionShader; }
 	void		SetReflectionShader(Shader* s)			{ reflectionShader = s; }
-	Shader*		GetReflectiveTextureShader() const		{ return reflectiveTextureShader; }
-	void		SetReflectiveTextureShader(Shader* s)	{ reflectiveTextureShader = s; }
 
 	// Snow and rain rendering booleans
 	void		SetRenderSnow(bool b)	{ renderSnow = b; }
@@ -179,6 +183,7 @@ protected:
 	void	ApplyPostProcessEffects();
 	void	ResetPPFX();
 	void	DrawOmniDirShadowScene();
+	void	DrawShadows();
 
 	void	SetShaderParticleSize(float f);
 	void	DrawSkybox();
@@ -188,7 +193,6 @@ protected:
 	void	AttachTexturesFBO(GLuint &fbo, GLuint &colourTexture, GLuint &depthTexture);
 	void	AttachDepthTextureFBO(GLuint &fbo, GLuint &depthTexture);
 	void	DrawParticleCollisionFBO();
-	void	DrawReflectiveTextureFBO();
 
 	void	DrawPostProcess();
 	void	RenderWeather();
@@ -230,9 +234,10 @@ protected:
 	vector<SceneNode*>	treeNodes;
 	vector<SceneNode*>	rockNodes;
 	// SECOND_SCENE
-	SceneNode*			texturedSphereNode;
+	SceneNode*			earthNode;
 	SceneNode*			reflectiveSphereNode;
 	SceneNode*			sunNode;
+	SceneNode*			moonNode;
 
 	// FIRST_SCENE
 	Font*			dataFont;
@@ -246,9 +251,10 @@ protected:
 	OBJMesh*		treeMesh;
 	OBJMesh*		rockMesh;
 	// SECOND_SCENE
-	OBJMesh*		texturedSphereMesh;
+	OBJMesh*		earthMesh;
 	OBJMesh*		reflectiveSphereMesh;
 	OBJMesh*		sunMesh;
+	OBJMesh*		moonMesh;
 
 	// FIRST_SCENE
 	GLuint		cubeMapSunnyTexture;
@@ -259,6 +265,7 @@ protected:
 	GLuint		cubeMapSpaceTexture;
 	GLuint		earthTexture;
 	GLuint		sunTexture;
+	GLuint		moonTexture;
 
 	// FIRST_SCENE
 	GLuint		snowCollisionFBO;
@@ -278,8 +285,6 @@ protected:
 	GLuint		shadowTexture;
 	GLuint		omniShadowFBO;
 	GLuint		omniShadowCubeMapTexture;
-	GLuint		reflectiveTextureFBO;
-	GLuint		reflectiveColourTexture;
 
 	// FIRST_SCENE
 	Shader*		defaultShader;
@@ -296,8 +301,8 @@ protected:
 	// SECOND_SCENE
 	Shader*		shadowShader;
 	Shader*		omniShadowShader;
+	Shader*		sceneObjectOmniShader;
 	Shader*		reflectionShader;
-	Shader*		reflectiveTextureShader;
 
 	bool renderSnow = false;
 	bool renderRain = false;
@@ -311,7 +316,7 @@ protected:
 	bool fboInUse = false;
 	bool castShadows = false;
 	bool castOmniShadows = false;
-	Matrix4 shadowMatrices[6];
+	Matrix4 lightMatrices[6];
 
 	bool shadowDebuggingMode = false;
 	bool movingLightMode = false;
