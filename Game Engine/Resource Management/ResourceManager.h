@@ -1,4 +1,4 @@
-// Code written for CSC3224 by Mark Kostadinov, Student Number 150368616
+// Code written for CSC8502 by Mark Kostadinov, Student Number 150368616
 //
 // This class handles the initial loading of all resources, such as shaders, textures, meshes and Scene nodes.
 

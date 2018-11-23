@@ -1,4 +1,4 @@
-// Code written for CSC3224 by Mark Kostadinov, Student Number 150368616
+// Code written for CSC8502 by Mark Kostadinov, Student Number 150368616
 //
 // This class handles the successful initialization of the program.
 

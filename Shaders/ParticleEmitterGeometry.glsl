@@ -19,7 +19,7 @@ divide stage will make our quads the correct size
 on screen. Neat!
 
 */
-#version 440
+#version 330
  
 //This is set by the Renderer SetShaderParticleSize
 //function!

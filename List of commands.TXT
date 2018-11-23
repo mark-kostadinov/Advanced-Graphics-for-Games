@@ -7,3 +7,5 @@
 - Pressing [5] will toggle the moving light mode in every scene.
 
 The commands available for each scene are listed in the top left corner of the screen, along with the framerate and GPU memory usage.
+
+Link to a Youtube highlight video: https://youtu.be/2QU3IamgG3k

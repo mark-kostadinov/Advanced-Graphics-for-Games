@@ -1,4 +1,4 @@
-#version 440 core
+#version 330 core
 
 uniform float particlePosX;
 uniform float particlePosZ;

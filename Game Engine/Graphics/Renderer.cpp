@@ -85,6 +85,7 @@ void Renderer::RenderScene()
 
 	SwapBuffers();
 	ClearNodeLists();
+	glUseProgram(0);
 }
 
 void Renderer::DrawScene()
@@ -981,7 +982,7 @@ void Renderer::SetUniforms(SceneNode* n)
 			for (int i = 0; i < 6; i++)
 			{
 				string smi = "lightMatrices[" + to_string(i) + "]";
-				glUniformMatrix4fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), smi.c_str()), 1, false, lightMatrices[i].values);
+				glUniformMatrix4fv(glGetUniformLocation(GetCurrentShader()->GetProgram(), smi.c_str()), 6, false, lightMatrices[i].values);
 			}
 		}
 		glUniform1f(glGetUniformLocation(GetCurrentShader()->GetProgram(), "farPlane"), 30000.0f);

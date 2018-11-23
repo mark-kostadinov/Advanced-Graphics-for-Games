@@ -1,4 +1,4 @@
-#version 440 core
+#version 330 core
 
 uniform sampler2D diffuseTex;
 uniform vec2 pixelSize;

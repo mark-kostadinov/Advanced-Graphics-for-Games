@@ -1,4 +1,4 @@
-#version 440 core
+#version 330 core
 
 uniform samplerCube cubeTex;
 uniform vec3 cameraPos;
