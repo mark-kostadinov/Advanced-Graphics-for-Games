@@ -18,9 +18,9 @@
 
 // Window global variables
 constexpr const char* programTitle = "CSC8502 Coursework";
-constexpr int windowSizeX = 1920;
-constexpr int windowSizeY = 1200;
-constexpr bool fullScreen = true;
+constexpr int windowSizeX = 1280;
+constexpr int windowSizeY = 720;
+constexpr bool fullScreen = false;
 
 // Some GL_CLEAR colour definitions
 #define GL_BLACK					0.0f, 0.0f, 0.0f, 1.0f
