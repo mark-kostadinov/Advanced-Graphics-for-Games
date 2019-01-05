@@ -44,7 +44,7 @@ void Renderer::UpdateScene(float msec)
 	camera->UpdateCamera();
 	viewMatrix = camera->BuildViewMatrix();
 #ifdef CINEMATIC_CAM_MOVEMENT
-	viewMatrix = Matrix4::BuildViewMatrix(camera->GetPosition(), Vector3(0, 0, 0));
+	viewMatrix = Matrix4::BuildViewMatrix(camera->GetPosition(), camera->GetDirection());
 #endif // CINEMATIC_CAM_MOVEMENT
 	frameFrustum.FromMatrix(projMatrix*viewMatrix);
 
@@ -78,7 +78,7 @@ void Renderer::RenderScene()
 	else
 	{
 		DrawShadows();
-		DrawScene();
+		DrawScene(); /// TODO: Apply bloom to the Sun (NB: fboInUse)
 		ResetPPFX();
 	}
 	RenderText(textBuffer);
@@ -704,7 +704,7 @@ void Renderer::UpdateLights()
 		mainLight->SetColour(Vector4(0.95f, 1.0f, 0.9f, 1.0f));
 		mainLight->SetRadius(RAW_HEIGHT * HEIGHTMAP_X * 3.0f);
 
-		movingLight->SetPosition(Vector3(movingLight->GetPosition().x, SECOND_SCENE_MOVING_LIGHT_Y, movingLight->GetPosition().z));
+		movingLight->SetPosition(Vector3(movingLight->GetPosition().x, SECOND_SCENE_MOVING_LIGHT_Y, movingLight->GetPosition().z));		
 		movingLight->SetRadius(30000.0f);
 	}
 }
@@ -714,13 +714,13 @@ void Renderer::UpdateMovingLight(Light * l, float delta, bool orbit)
 	if (orbit)
 	{
 		float radius = 15000.0f;
-		float x = sin(planetRotationAngle * 0.05f) * radius;
-		float z = cos(planetRotationAngle * 0.05f) * radius;
-		float sunX = sin(planetRotationAngle * 0.05f) * radius + 3000.0f;
-		float sunZ = cos(planetRotationAngle * 0.05f) * radius + 3000.0f;
+		float x = sin(planetRotationAngle * 0.05f) * (radius - 1000.0f);
+		float z = cos(planetRotationAngle * 0.05f) * (radius - 1000.0f);
+		float sunX = sin(planetRotationAngle * 0.05f) * radius;
+		float sunZ = cos(planetRotationAngle * 0.05f) * radius;
 
 		l->SetPosition(Vector3(x, l->GetPosition().y, z));
-		GetSunNode()->SetTransform(Matrix4::Translation(Vector3(sunX - 3000.0f, GetSunNode()->GetTransform().GetPositionVector().y, sunZ - 3000.0f)));
+		GetSunNode()->SetTransform(Matrix4::Translation(Vector3(sunX, GetSunNode()->GetTransform().GetPositionVector().y, sunZ)));
 	}
 	else
 	{

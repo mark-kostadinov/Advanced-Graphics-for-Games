@@ -56,6 +56,14 @@ public:
 	//Sets pitch, in degrees
 	void	SetPitch(float p) { pitch = p; }
 
+	// Addition by Mark Kostadinov <m.kostadinov1@newcastle.ac.uk>
+	Vector3 GetDirection() const
+	{
+		Vector3 direction = position;
+		direction.Normalise();
+		return direction;
+	}
+
 protected:
 	float	yaw;
 	float	pitch;

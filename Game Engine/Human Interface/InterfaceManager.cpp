@@ -24,6 +24,11 @@ void InterfaceManager::Update()
 		GetRenderer()->GetCamera()->SetPosition(Vector3(-1000.0f, 1000.0f, -1000.0f));
 #endif // DEBUG
 
+	if (Window::GetKeyboard()->KeyHeld(KEYBOARD_8))
+	{
+		GetRenderer()->GetCamera()->SetPosition(GetRenderer()->GetMovingLight()->GetPosition());
+	}
+
 	if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE)
 	{
 		// Go back to normal weather

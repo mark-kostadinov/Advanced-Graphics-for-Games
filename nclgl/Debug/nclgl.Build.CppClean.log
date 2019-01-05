@@ -1,33 +1,33 @@
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\nclgl.pdb
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\nclgl.idb
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\shader.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\scenenode.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\quaternion.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\plane.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\particleemitter.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\oglrenderer.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\objmesh.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\mouse.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\mesh.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\md5node.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\md5mesh.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\md5filedata.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\md5anim.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\matrix4.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\keyboard.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\heightmap.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\gametimer.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\frustum.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\cuberobot.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\camera.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\window.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\textureatlas.obj
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\textmesh.obj
-c:\users\b5036861\github\advanced-graphics-for-games\game engine\debug\nclgl.lib
-c:\users\b5036861\github\advanced-graphics-for-games\game engine\debug\nclgl.pdb
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\cl.command.1.tlog
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\cl.read.1.tlog
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\cl.write.1.tlog
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\lib-link.read.1.tlog
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\lib-link.write.1.tlog
-c:\users\b5036861\github\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\lib.command.1.tlog
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\nclgl.pdb
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\nclgl.idb
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\shader.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\scenenode.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\quaternion.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\plane.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\particleemitter.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\oglrenderer.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\objmesh.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\mouse.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\mesh.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\md5node.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\md5mesh.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\md5filedata.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\md5anim.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\matrix4.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\keyboard.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\heightmap.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\gametimer.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\frustum.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\cuberobot.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\camera.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\window.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\textureatlas.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\textmesh.obj
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\game engine\debug\nclgl.lib
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\game engine\debug\nclgl.pdb
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\cl.command.1.tlog
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\cl.read.1.tlog
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\cl.write.1.tlog
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\lib-link.read.1.tlog
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\lib-link.write.1.tlog
+c:\users\mark\desktop\uni\year 4\csc8502 advanced graphics for games\advanced-graphics-for-games\nclgl\debug\nclgl.tlog\lib.command.1.tlog

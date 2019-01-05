@@ -39,9 +39,9 @@ constexpr float sceneTransitionRate = 1.0f / sceneTransitionTime;
 
 // Scene object definitions
 constexpr int scenesCount	= 3;
-#define ROCK_MTL_FILE_NAME			"Rock.mtl"
 constexpr int numberOfTrees = 10;
 constexpr int numberOfRocks = 5;
+#define ROCK_MTL_FILE_NAME					"Rock.mtl"
 #define SUN_STARTING_POS					Vector3(0.0f, 1500.0f, 0.0f)
 #define MOON_STARTING_POS					Vector3(-4000.0f, 2000.0f, -4000.0f)
 
@@ -50,7 +50,7 @@ constexpr float lightMovementDelta = 10.0f;
 #define FIRST_SCENE_MAIN_LIGHT_POS			Vector3(-4000.0f, 10000.0f, -4000.0f)
 #define SECOND_SCENE_MAIN_LIGHT_POS			Vector3(-30000.0f, 2000.0f, -10000.0f)
 #define FIRST_SCENE_MOVING_LIGHT_Y			25000.0f
-#define SECOND_SCENE_MOVING_LIGHT_Y			3000.0f
+#define SECOND_SCENE_MOVING_LIGHT_Y			1800.0f
 #define FIRST_SCENE_CAM_POS					Vector3(7000.0f, 4500.0f, 22000.0f)
 #define SECOND_SCENE_CAM_POS				Vector3(8500.0f, 2500.0f, -13000.0f)
 #define FIRST_MINI_SCENE_CAM_POS			Vector3(-10000.0f, 10000.0f, 10000.0f)
