@@ -184,6 +184,7 @@ protected:
 	void	ResetPPFX();
 	void	DrawOmniDirShadowScene();
 	void	DrawShadows();
+	void	RenderSceneFBO();
 
 	void	SetShaderParticleSize(float f);
 	void	DrawSkybox();

@@ -60,13 +60,7 @@ void Renderer::RenderScene()
 	if (GetSceneManager()->IsSceneCyclingAllowed() && 
 		GetSceneManager()->GetSceneTimer()->GetMS() >= sceneCycleTimeMS - sceneTransitionTime)
 	{
-		DrawShadows();
-		glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		fboInUse = true;
-		DrawScene();
-		fboInUse = false;
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		RenderSceneFBO();
 
 		// Have to split it up due to the use of another FBO in some methods
 		if (GetSceneManager()->GetCurrentScene() == FIRST_SCENE)
@@ -78,7 +72,7 @@ void Renderer::RenderScene()
 	else
 	{
 		DrawShadows();
-		DrawScene(); /// TODO: Apply bloom to the Sun (NB: fboInUse)
+		DrawScene();
 		ResetPPFX();
 	}
 	RenderText(textBuffer);
@@ -209,6 +203,17 @@ void Renderer::DrawShadows()
 		DrawOmniDirShadowScene();
 }
 
+void Renderer::RenderSceneFBO()
+{
+	DrawShadows();
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	fboInUse = true;
+	DrawScene();
+	fboInUse = false;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void Renderer::GenerateFBOs()
 {
 	GenerateDepthTextureFBO(snowBufferDepthTexture);
@@ -250,6 +255,7 @@ void Renderer::GenerateFBOs()
 	glGenFramebuffers(1, &postProcessingFBO);
 	glGenFramebuffers(1, &bufferFBO);
 
+	// Shadows
 	glGenFramebuffers(1, &omniShadowFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, omniShadowFBO);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, omniShadowCubeMapTexture, 0);
@@ -298,7 +304,10 @@ void Renderer::AttachTexturesFBO(GLuint & fbo, GLuint & colourTexture, GLuint & 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || !depthTexture || !colourTexture)
+	{
+		PrintToConsole("Error: Framebuffer is not complete!", 1);
 		return;
+	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -952,8 +961,8 @@ void Renderer::SetUniforms(SceneNode* n)
 	{
 		glUniform1i(glGetUniformLocation(GetCurrentShader()->GetProgram(), "cubeTex"), 4);
 		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, skyMesh->GetTexture()); /// TODO: Capture the whole scene around the sphere
-	} 
+		glBindTexture(GL_TEXTURE_CUBE_MAP, skyMesh->GetTexture());
+	}
 	// Shadows
 	if (n->GetMesh() == heightMap || n->GetMesh() == treeMesh || n->GetMesh() == rockMesh || n->GetMesh() == earthMesh ||
 		n->GetMesh() == reflectiveSphereMesh || n->GetMesh() == sunMesh || n->GetMesh() == moonMesh)
